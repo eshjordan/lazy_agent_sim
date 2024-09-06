@@ -26,7 +26,7 @@ setup(
     entry_points={
         "console_scripts": [
             "agent_local_comms_server = agent_local_comms_server.agent_local_comms_server:main",
-            "test_robot = agent_local_comms_server.test_robot:main",
+            "ros_comms_server = agent_local_comms_server.ros_comms_server:main",
         ],
     },
 )

@@ -40,7 +40,7 @@ def generate_launch_description():
     def launch_robot_comms(id: int, teleop: bool = True):
         node = launch_ros.actions.Node(
             package="agent_local_comms_server",
-            executable="test_robot",
+            executable="ros_comms_server",
             name=f"test_robot{id}",
             output="screen",
             parameters=[

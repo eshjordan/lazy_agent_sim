@@ -7,10 +7,8 @@ import time
 
 def main():
     node = Node()
-    stringmsg_topic = "/example_stringmsg_topic"
-    vector3d_topic = "/example_vector3d_topic"
-    pub_stringmsg = node.advertise(stringmsg_topic, StringMsg)
-    pub_vector3d = node.advertise(vector3d_topic, Vector3d)
+    addr = "epuck2_0_bt_addr"
+    subscription_topic = "epuck2_0_bt_addr/rx"
 
     vector3d_msg = Vector3d()
     vector3d_msg.x = 10
@@ -34,3 +32,7 @@ def main():
 
     except KeyboardInterrupt:
         pass
+
+
+if __name__ == "__main__":
+    main()

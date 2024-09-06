@@ -142,16 +142,8 @@
         filename="gz-sim-comms-endpoint-system"
         name="gz::sim::systems::CommsEndpoint">
         <address>epuck2_0_bt_addr</address>
-        <topic>model/epuck2_0/bt_addr/rx</topic>
+        <topic>epuck2_0_bt_addr/rx</topic>
       </plugin>
-
-      <plugin
-        filename="gz-sim-comms-endpoint-system"
-        name="gz::sim::systems::CommsEndpoint">
-        <address>epuck2_0_wifi_addr</address>
-        <topic>/model/epuck2_0/wifi_addr/rx</topic>
-      </plugin>
-
 
     </model>
 
