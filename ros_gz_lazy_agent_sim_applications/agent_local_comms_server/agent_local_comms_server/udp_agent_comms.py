@@ -50,9 +50,9 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
                 host = self.client_address[0]
                 port = self.client_address[1]
 
-                response = EpuckKnowledgePacket.unpack(data)
+                request = EpuckKnowledgePacket.unpack(data)
 
-                other_known_ids = set(response.known_ids)
+                other_known_ids = set(request.known_ids)
                 difference = other_known_ids.difference(robot_model.known_ids)
                 robot_model.known_ids.update(other_known_ids)
 
@@ -62,7 +62,7 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
                     )
 
                 robot_model.logger.debug(
-                    f"Received knowledge from {response.robot_id} ({host}:{port}): {other_known_ids}"
+                    f"Received knowledge from {request.robot_id} ({host}:{port}): {other_known_ids}"
                 )
 
                 knowledge = EpuckKnowledgePacket(
@@ -74,7 +74,7 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
                 client.sendto(knowledge.pack(), self.client_address)
 
                 robot_model.logger.debug(
-                    f"Sending knowledge to {response.robot_id} ({host}:{port}): {robot_model.known_ids}"
+                    f"Sending knowledge to {request.robot_id} ({host}:{port}): {robot_model.known_ids}"
                 )
 
                 return

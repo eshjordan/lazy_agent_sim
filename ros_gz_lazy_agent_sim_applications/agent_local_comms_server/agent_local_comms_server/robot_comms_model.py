@@ -8,7 +8,6 @@ import time
 from typing import Callable
 
 from agent_local_comms_server.packets import (
-    EpuckKnowledgePacket,
     EpuckHeartbeatPacket,
     EpuckHeartbeatResponsePacket,
     EpuckNeighbourPacket,

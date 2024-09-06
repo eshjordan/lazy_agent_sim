@@ -19,11 +19,6 @@ import tf2_ros.buffer
 import tf2_ros.transform_listener
 
 
-ENDIAN_FMT = "<"
-MAX_ROBOTS = 10
-MAX_HOST_LEN = 16
-
-
 class LocalCommsManager(rclpy.node.Node):
     def __init__(self):
         super().__init__("local_comms_manager")
