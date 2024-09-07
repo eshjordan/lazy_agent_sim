@@ -96,9 +96,9 @@
       </link>
     </model>
 
-    <model name="epuck2_0">
+    <model name="epuck2_robot_0">
       <self_collide>false</self_collide>
-      <pose>0 0 0.001 0 0 0</pose>
+      <pose>-0.1 -0.1 0.001 0 0 0</pose>
       <include merge="true">
         <uri>package://ros_gz_lazy_agent_sim_description/models/epuck2</uri>
       </include>
@@ -112,7 +112,7 @@
         <wheel_separation>0.052</wheel_separation>
         <wheel_radius>0.4</wheel_radius>
         <odom_publish_frequency>10</odom_publish_frequency>
-        <topic>model/epuck2_0/cmd_vel</topic>
+        <topic>model/epuck2_robot_0/cmd_vel</topic>
       </plugin>
 
       <!-- State-related plugins and topics -->
@@ -134,15 +134,74 @@
       <plugin
         filename="gz-sim-odometry-publisher-system"
         name="gz::sim::systems::OdometryPublisher">
-        <robot_base_frame>epuck2_0</robot_base_frame>
+        <robot_base_frame>epuck2_robot_0</robot_base_frame>
       </plugin>
 
       <!-- RF Comms -->
       <plugin
         filename="gz-sim-comms-endpoint-system"
         name="gz::sim::systems::CommsEndpoint">
-        <address>epuck2_0_bt_addr</address>
-        <topic>epuck2_0_bt_addr/rx</topic>
+        <address>aa:bb:cc:dd:ee:00</address>
+        <topic>aa:bb:cc:dd:ee:00/rx</topic>
+        <broker>
+          <bind_service>/broker/bind</bind_service>
+          <unbind_service>/broker/unbind</unbind_service>
+        </broker>
+      </plugin>
+
+    </model>
+
+    <model name="epuck2_robot_1">
+      <self_collide>false</self_collide>
+      <pose>0.1 -0.1 0.001 0 0 0</pose>
+      <include merge="true">
+        <uri>package://ros_gz_lazy_agent_sim_description/models/epuck2</uri>
+      </include>
+
+      <!-- Differential drive controller plugin -->
+      <plugin
+        filename="gz-sim-diff-drive-system"
+        name="gz::sim::systems::DiffDrive">
+        <left_joint>base_link_left_wheel</left_joint>
+        <right_joint>base_link_right_wheel</right_joint>
+        <wheel_separation>0.052</wheel_separation>
+        <wheel_radius>0.4</wheel_radius>
+        <odom_publish_frequency>10</odom_publish_frequency>
+        <topic>model/epuck2_robot_1/cmd_vel</topic>
+      </plugin>
+
+      <!-- State-related plugins and topics -->
+      <plugin
+        filename="gz-sim-joint-state-publisher-system"
+        name="gz::sim::systems::JointStatePublisher">
+      </plugin>
+
+      <plugin
+        filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>true</publish_link_pose>
+        <publish_sensor_pose>true</publish_sensor_pose>
+        <publish_model_pose>true</publish_model_pose>
+        <use_pose_vector_msg>true</use_pose_vector_msg>
+        <static_publisher>true</static_publisher>
+        <static_update_frequency>1</static_update_frequency>
+      </plugin>
+      <plugin
+        filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+        <robot_base_frame>epuck2_robot_1</robot_base_frame>
+      </plugin>
+
+      <!-- RF Comms -->
+      <plugin
+        filename="gz-sim-comms-endpoint-system"
+        name="gz::sim::systems::CommsEndpoint">
+        <address>aa:bb:cc:dd:ee:01</address>
+        <topic>aa:bb:cc:dd:ee:01/rx</topic>
+        <broker>
+          <bind_service>/broker/bind</bind_service>
+          <unbind_service>/broker/unbind</unbind_service>
+        </broker>
       </plugin>
 
     </model>
@@ -181,7 +240,7 @@
         <gz-gui>
           <property key="state" type="string">docked_collapsed</property>
         </gz-gui>
-        <topic>/world/arena/model/epuck2_0/link/base_link/sensor/camera/image</topic>
+        <topic>/world/arena/model/epuck2_robot_0/link/base_link/sensor/camera/image</topic>
       </plugin>
 
       <plugin filename="VisualizeLidar" name="Lidar Visualizer">
@@ -194,7 +253,7 @@
         <gz-gui>
           <property key="state" type="string">docked_collapsed</property>
         </gz-gui>
-        <topic>/model/epuck2_0/cmd_vel</topic>
+        <topic>/model/epuck2_robot_0/cmd_vel</topic>
       </plugin>
 
 

@@ -1,11 +1,18 @@
+#!/usr/bin/env python3
+
 from gz.msgs10.dataframe_pb2 import Dataframe
 from gz.transport13 import Node
 
+import rclpy
+import rclpy.node
 import logging
+import threading
 import time
+from typing import Callable, override
+import queue
 
 from agent_local_comms_server.packets import (
-    EpuckAddressKnowledgePacket,
+    EpuckKnowledgePacket,
     EpuckNeighbourPacket,
 )
 from agent_local_comms_server.robot_comms_model import (
@@ -22,89 +29,139 @@ class GZKnowledgeServer(BaseKnowledgeServer):
         self.pub_knowledge = None
         self.sub_knowledge = None
 
+    @override
     def start(self):
         self.pub_knowledge = self.node.advertise("/broker/msgs", Dataframe)
 
-        if !self.node.subscribe(Dataframe, f"{robot_model.robot_host}/rx", self.handle):
-            raise RuntimeError(f"Failed to subscribe to topic {robot_model.robot_host}/rx")
+        if not self.node.subscribe(
+            Dataframe, f"{self.robot_model.robot_host}/rx", self.handle
+        ):
+            raise RuntimeError(
+                f"Failed to subscribe to topic {self.robot_model.robot_host}/rx"
+            )
 
+    @override
     def stop(self):
         del self.sub_knowledge
         del self.pub_knowledge
 
     def handle(self, msg: Dataframe):
-        self.robot_model.logger.info("Received knowledge:")
-        self.robot_model.logger.info(msg.header)
-        self.robot_model.logger.info(msg.src_address)
-        self.robot_model.logger.info(msg.dst_address)
-        self.robot_model.logger.info(msg.data)
-
         address = msg.src_address
 
         request = EpuckKnowledgePacket.unpack(msg.data)
 
         other_known_ids = set(request.known_ids)
-        difference = other_known_ids.difference(robot_model.known_ids)
-        robot_model.known_ids.update(other_known_ids)
+        difference = other_known_ids.difference(self.robot_model.known_ids)
+        self.robot_model.known_ids.update(other_known_ids)
 
         if len(difference) > 0:
-            robot_model.logger.info(
+            self.robot_model.logger.info(
                 f"Received new IDs from ({address}): {difference}"
             )
 
-        robot_model.logger.debug(
+        self.robot_model.logger.debug(
             f"Received knowledge from {request.robot_id} ({address}): {other_known_ids}"
         )
 
         knowledge = EpuckKnowledgePacket(
-            robot_id=robot_model.robot_id,
-            N=len(robot_model.known_ids),
-            known_ids=list(robot_model.known_ids),
+            robot_id=self.robot_model.robot_id,
+            N=len(self.robot_model.known_ids),
+            known_ids=list(self.robot_model.known_ids),
         )
 
-        response = StringMsg()
+        response = Dataframe()
         response.data = knowledge.pack()
-        response.set_src_address(robot_model.robot_host)
-        response.set_dst_address(address)
+        response.src_address = self.robot_model.robot_host
+        response.dst_address = address
 
         self.pub_knowledge.publish(response)
 
-        client.sendto(knowledge.pack(), self.client_address)
-
-        robot_model.logger.debug(
-            f"Sending knowledge to {request.robot_id} ({address}): {robot_model.known_ids}"
+        self.robot_model.logger.debug(
+            f"Sending knowledge to {request.robot_id} ({address}): {self.robot_model.known_ids}"
         )
 
         return
 
 
-def main2():
-    node = Node()
-    addr = "epuck2_0_bt_addr"
-    subscription_topic = "epuck2_0_bt_addr/rx"
+class GZKnowledgeClient(BaseKnowledgeClient):
+    def __init__(
+        self,
+        neighbour: EpuckNeighbourPacket,
+        running: Callable[[], bool],
+        robot_model: RobotCommsModel,
+    ):
+        super().__init__(neighbour, running, robot_model)
+        self.node = Node()
+        self.pub_knowledge = None
+        self.thread = threading.Thread(target=self.send_knowledge)
+        self.thread.daemon = True
 
-    vector3d_msg = Vector3d()
-    vector3d_msg.x = 10
-    vector3d_msg.y = 15
-    vector3d_msg.z = 20
+    @override
+    def start(self):
+        self.pub_knowledge = self.node.advertise("/broker/msgs", Dataframe)
+        self.thread.start()
 
-    stringmsg_msg = StringMsg()
-    stringmsg_msg.data = "Hello"
-    try:
-        count = 0
-        while True:
-            count += 1
-            vector3d_msg.x = count
-            if not pub_stringmsg.publish(stringmsg_msg):
+    @override
+    def stop(self):
+        del self.pub_knowledge
+        self.thread.join()
+
+    def send_knowledge(self):
+        self.robot_model.logger.info(
+            f"Starting knowledge connection with {self.neighbour.robot_id} ({self.neighbour.host})"
+        )
+
+        response_queue = queue.SimpleQueue()
+
+        def handle(msg: Dataframe):
+            if msg.src_address == self.neighbour.host:
+                response_queue.put(msg)
+
+        if not self.node.subscribe(
+            Dataframe, f"{self.robot_model.robot_host}/rx", handle
+        ):
+            raise RuntimeError(
+                f"Failed to subscribe to topic {self.robot_model.robot_host}/rx"
+            )
+
+        while self.running():
+            knowledge = EpuckKnowledgePacket(
+                robot_id=self.robot_model.robot_id,
+                N=len(self.robot_model.known_ids),
+                known_ids=list(self.robot_model.known_ids),
+            )
+
+            request = Dataframe()
+            request.data = knowledge.pack()
+            request.src_address = self.robot_model.robot_host
+            request.dst_address = self.neighbour.host
+
+            self.pub_knowledge.publish(request)
+
+            try:
+                response: Dataframe = response_queue.get(timeout=2.0)
+            except queue.Empty:
+                self.robot_model.logger.warning(
+                    f"Failed to receive knowledge from {self.neighbour.robot_id} ({self.neighbour.host})"
+                )
                 break
-            print("Publishing 'Hello' on topic [{}]".format(stringmsg_topic))
-            if not pub_vector3d.publish(vector3d_msg):
-                break
-            print("Publishing a Vector3d on topic [{}]".format(vector3d_topic))
-            time.sleep(0.1)
 
-    except KeyboardInterrupt:
-        pass
+            response = EpuckKnowledgePacket.unpack(response.data)
+
+            other_known_ids = set(response.known_ids)
+            difference = other_known_ids.difference(self.robot_model.known_ids)
+            self.robot_model.known_ids.update(other_known_ids)
+
+            if len(difference) > 0:
+                self.robot_model.logger.info(
+                    f"Received new IDs from ({self.neighbour.host}): {difference}"
+                )
+
+            self.robot_model.logger.debug(
+                f"Received knowledge from {self.neighbour.robot_id} ({self.neighbour.host}): {other_known_ids}"
+            )
+
+            time.sleep(1)
 
 
 def main():
@@ -122,7 +179,7 @@ def main():
         .integer_value
     )
     robot_host = (
-        node.declare_parameter("robot_host", "8a:7a:37:7e:67:54")
+        node.declare_parameter("robot_host", "aa:bb:cc:dd:ee:00")
         .get_parameter_value()
         .string_value
     )

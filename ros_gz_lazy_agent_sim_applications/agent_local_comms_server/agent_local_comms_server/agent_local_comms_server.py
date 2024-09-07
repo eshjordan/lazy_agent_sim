@@ -76,7 +76,7 @@ class LocalCommsManager(rclpy.node.Node):
         return (
             f"{self.get_parameter("robot_tf_prefix").value}"
             + f"{id}"
-            + f"{self.get_parameter("robot_tf_suffix").value}/"
+            + f"{self.get_parameter("robot_tf_suffix").value}"
             + f"{self.get_parameter("robot_tf_frame").value}"
         )
 

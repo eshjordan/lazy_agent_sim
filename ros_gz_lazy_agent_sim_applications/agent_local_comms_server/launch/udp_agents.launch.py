@@ -17,7 +17,7 @@ def generate_launch_description():
                 "manager_threshold_dist": "0.1",
                 "manager_robot_tf_prefix": "epuck2_robot_",
                 "manager_robot_tf_suffix": "",
-                "manager_robot_tf_frame": "base_link",
+                "manager_robot_tf_frame": "/base_link",
                 "robot0_host": "127.0.0.1",
                 "robot0_port": "50002",
                 "robot1_host": "127.0.0.1",
@@ -40,8 +40,8 @@ def generate_launch_description():
     def launch_robot_comms(id: int, teleop: bool = True):
         node = launch_ros.actions.Node(
             package="agent_local_comms_server",
-            executable="ros_comms_server",
-            name=f"test_robot{id}",
+            executable="udp_agent_comms",
+            name=f"knowledge_comms_robot{id}",
             output="screen",
             parameters=[
                 {

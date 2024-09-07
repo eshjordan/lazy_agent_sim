@@ -84,7 +84,7 @@ Visualization Manager:
         Inertia: false
         Mass: false
       Name: RobotModel
-      TF Prefix: epuck2_0
+      TF Prefix: epuck2_robot_0
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -125,7 +125,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /epuck2_0/odometry
+        Value: /epuck2_robot_0/odometry
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -157,14 +157,14 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /epuck2_0/scan
+        Value: /epuck2_robot_0/scan
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: epuck2_0/odom
+    Fixed Frame: epuck2_robot_0/odom
     Frame Rate: 30
   Name: root
   Tools:
