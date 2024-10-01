@@ -43,6 +43,15 @@ def generate_launch_description():
             executable="udp_agent_comms",
             name=f"knowledge_comms_robot{id}",
             output="screen",
+            # prefix=[
+            #     # Debugging with gdb
+            #     "xterm -bg black -fg white -fa 'Monospace' -fs 13 -e gdb -ex start --args"
+            # ],
+            # arguments=[
+            #     "--ros-args",
+            #     "--log-level",
+            #     "debug",
+            # ],
             parameters=[
                 {
                     "robot_id": id,
@@ -82,7 +91,6 @@ def generate_launch_description():
                     (
                         "frame_id:=",
                         *get_namespace(id),
-                        "/",
                         launch.substitutions.LaunchConfiguration(
                             "manager_robot_tf_frame"
                         ),
@@ -132,6 +140,17 @@ def generate_launch_description():
                         "manager_robot_tf_frame"
                     ),
                 }.items(),
+            ),
+            launch.actions.IncludeLaunchDescription(
+                launch.launch_description_sources.PythonLaunchDescriptionSource(
+                    PathJoinSubstitution(
+                        [
+                            FindPackageShare("epuck_driver_cpp"),
+                            "launch",
+                            "multi_epuck2.launch.py",
+                        ]
+                    )
+                ),
             ),
         ]
     )

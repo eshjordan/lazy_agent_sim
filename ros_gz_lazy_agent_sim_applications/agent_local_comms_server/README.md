@@ -8,4 +8,4 @@ and allows Wi-Fi communication to be range-limited.
 ## Sequence Diagram
 [How to add PlantUML diagrams in Markdown](https://stackoverflow.com/a/32771815)
 
-![PlantUML Sequence Diagram](https://www.plantuml.com/plantuml/svg/DSZ9iS8m303GLlul8D6TPZAEB68pMemM6Bhdn3k-_wd8rQcS_qRcYXk0j_T-pHnrLf2ZQPBcZYP0CHxclIc8dPDfSpij9yPs_ooGDXN24Tf5cWSRDZxGHE88yXSvT4FunRD8aVPLmby0)
+![PlantUML Sequence Diagram](https://www.plantuml.com/plantuml/svg/LOzHJe0m38RVFOLUW884S3vnawLq1MR6DjTE8wTtnlXW-j3a-zBq_rTHB5glyF3a8uNgk9RmUAfcUGKe-DaTNi-wLU52AIf7xIXTm7A-fU8mGi3xo-BHX1NVn32oMHmPDDlaXWqdTcp6lL-cbxsd-NccDcQ0aiGUj_r_RZ7du0dLfoZmYqCY3BOzlSIs51zSm2M2F_1UEH9t-QV3oj6r_Gq0)

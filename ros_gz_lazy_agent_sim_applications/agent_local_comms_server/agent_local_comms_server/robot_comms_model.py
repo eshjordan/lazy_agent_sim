@@ -119,6 +119,7 @@ class RobotCommsModel:
                 self.logger.debug(
                     f"Received neighbour: {neighbour.robot_id} ({neighbour.host}:{neighbour.port}) at distance {neighbour.dist}"
                 )
+                self.known_ids.add(neighbour.robot_id)
 
             # Start threads for new neighbours
             new_in_range_neighbours = [
@@ -132,7 +133,6 @@ class RobotCommsModel:
                 self.logger.info(
                     f"Starting thread for neighbour {neighbour.robot_id} ({neighbour.host}:{neighbour.port})"
                 )
-                client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
                 self.knowledge_clients[neighbour.robot_id] = self.KnowledgeClientClass(
                     neighbour,
@@ -152,7 +152,7 @@ class RobotCommsModel:
 
             for neighbour_id in out_of_range_neighbour_ids:
                 self.logger.info(
-                    f"Stopping thread for neighbour {neighbour.robot_id} ({neighbour.host}:{neighbour.port})"
+                    f"Stopping thread for neighbour {neighbour_id}"
                 )
                 knowledge_client = self.knowledge_clients.pop(neighbour_id)
                 knowledge_client.stop()
