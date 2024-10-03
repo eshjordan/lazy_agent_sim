@@ -43,6 +43,7 @@ def generate_launch_description():
     sim_gazebo = FindPackageShare("ros_gz_lazy_agent_sim_gazebo")
     sim_description = FindPackageShare("ros_gz_lazy_agent_sim_description")
     ros_gz_sim = FindPackageShare("ros_gz_sim")
+    agent_local_comms_server = FindPackageShare("agent_local_comms_server")
 
     # Load the URDF file from "description" package
     robot_desc = FileContent(
@@ -124,6 +125,13 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration("rviz")),
     )
 
+    # Inter-agent comms through Gazebo
+    inter_agent_comms = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([agent_local_comms_server, "launch", "gz_agents.launch.py"]),
+        ),
+    )
+
     return LaunchDescription(
         launch_args
         + [
@@ -131,5 +139,6 @@ def generate_launch_description():
             gz_container,
             robot_state_publisher,
             rviz,
+            inter_agent_comms,
         ]
     )

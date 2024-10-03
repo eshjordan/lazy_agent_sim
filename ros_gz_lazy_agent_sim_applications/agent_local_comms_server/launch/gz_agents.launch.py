@@ -117,8 +117,8 @@ def generate_launch_description():
         launch_args
         + launch_robot_comms(0, teleop=False)
         + launch_robot_comms(1, teleop=False)
-        # + launch_robot_comms(2)
-        # + launch_robot_comms(3)
+        # + launch_robot_comms(2, teleop=False)
+        # + launch_robot_comms(3, teleop=False)
         + [
             launch.actions.IncludeLaunchDescription(
                 launch.launch_description_sources.PythonLaunchDescriptionSource(
