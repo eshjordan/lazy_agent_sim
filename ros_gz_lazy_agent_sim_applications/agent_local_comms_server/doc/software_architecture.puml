@@ -1,0 +1,59 @@
+@startuml
+
+node "Controller PC" {
+  component "LocalCommsManager"
+
+  component "High-level Controller"
+
+  component "epuck_cpp_driver"
+
+  component "Motive Mocap ROS Driver"
+
+  package "Gazebo" {
+    component "Simulated e-puck 0"
+    component "Simulated e-puck 1"
+  }
+}
+
+node "e-puck 0" {
+  component "e-puck 0 RobotCommsModel"
+  component "e-puck 0 UDPKnowledgeServer"
+  component "e-puck 0 UDPKnowledgeClient"
+  component "e-puck 0 Advanced Sercom v2"
+}
+
+node "e-puck 1" {
+  component "e-puck 1 RobotCommsModel"
+  component "e-puck 1 UDPKnowledgeServer"
+  component "e-puck 1 UDPKnowledgeClient"
+  component "e-puck 1 Advanced Sercom v2"
+}
+
+node "Mocap Camera"
+
+"epuck_cpp_driver" <--> "e-puck 0 Advanced Sercom v2"
+"epuck_cpp_driver" <--> "e-puck 1 Advanced Sercom v2"
+
+"LocalCommsManager" <--> "e-puck 0 ESP32 Firmware"
+"LocalCommsManager" <--> "e-puck 1 ESP32 Firmware"
+
+"e-puck 0 ESP32 Firmware" <--> "e-puck 1 ESP32 Firmware"
+
+"Mocap Camera" <-- "e-puck 0"
+"Mocap Camera" <-- "e-puck 1"
+"Mocap Camera" --> "Motive Mocap ROS Driver"
+"Motive Mocap ROS Driver" --> "epuck_cpp_driver"
+
+"High-level Controller" <--> "epuck_cpp_driver"
+
+"High-level Controller" <-- "LocalCommsManager"
+
+"Simulated e-puck 0" <--> "Simulated e-puck 1"
+
+"Mocap Camera" -right-> "Simulated e-puck 0"
+"Mocap Camera" -right-> "Simulated e-puck 1"
+
+"Simulated e-puck 0" <-- "High-level Controller"
+"Simulated e-puck 1" <-- "High-level Controller"
+
+@enduml
