@@ -1,5 +1,7 @@
 @startuml
 
+!theme sunlust
+
 abstract class BaseKnowledgeServer {
   + BaseKnowledgeServer(std::shared_ptr<BaseRobotCommsModel> robot_model)
   + {abstract} void start()
@@ -33,31 +35,31 @@ abstract class BaseRobotCommsModel {
 
 
 struct EpuckHeartbeatPacket {
-  {static} uint8_t ID
-  uint8_t robot_id
-  std::array<char, MAX_HOST_LEN + 1> robot_host
-  uint16_t robot_port
+  +{static} uint8_t ID
+  +uint8_t robot_id
+  +std::array<char, MAX_HOST_LEN + 1> robot_host
+  +uint16_t robot_port
 }
 
 struct EpuckNeighbourPacket {
-  {static} uint8_t ID
-  uint8_t robot_id
-  std::array<char, MAX_HOST_LEN + 1> host
-  uint16_t port
-  float distance
+  +{static} uint8_t ID
+  +uint8_t robot_id
+  +std::array<char, MAX_HOST_LEN + 1> host
+  +uint16_t port
+  +float distance
 }
 
 struct EpuckHeartbeatResponsePacket {
-  {static} uint8_t ID
-  uint8_t num_neighbours
-  std::array<EpuckNeighbourPacket, MAX_ROBOTS> neighbours
+  +{static} uint8_t ID
+  +uint8_t num_neighbours
+  +std::array<EpuckNeighbourPacket, MAX_ROBOTS> neighbours
 }
 
 struct EpuckKnowledgePacket {
-  {static} uint8_t ID
-  uint8_t robot_id
-  uint8_t N
-  std::array<uint8_t, MAX_ROBOTS> known_ids
+  +{static} uint8_t ID
+  +uint8_t robot_id
+  +uint8_t N
+  +std::array<uint8_t, MAX_ROBOTS> known_ids
 }
 
 

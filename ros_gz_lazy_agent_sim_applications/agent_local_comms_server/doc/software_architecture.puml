@@ -1,5 +1,7 @@
 @startuml
 
+!theme sunlust
+
 !$enable_digital_twin = 0
 
 node "Mocap Camera"
@@ -37,12 +39,14 @@ node "e-puck 1" {
 "Mocap Camera" --> "Mocap ROS Driver": Positions
 "Mocap ROS Driver" --> "High-level Controller": Groundtruth
 
-"Controller PC" -[hidden]-> "e-puck 0"
-"Controller PC" -[hidden]-> "e-puck 1"
-"e-puck 0" -[hidden]> "e-puck 1"
-
 ' Simplify the diagram by hiding the UDP knowledge server and client connections if the digital twin is disabled
 !if ($enable_digital_twin == 0)
+  "High-level Controller" --> "epuck_cpp_driver": State & Controls
+  "High-level Controller" <-- "LocalCommsManager": Knowledge
+  "Controller PC" -[hidden]-> "e-puck 0"
+  "Controller PC" -[hidden]-> "e-puck 1"
+  "e-puck 0" -[hidden]> "e-puck 1"
+
   "epuck_cpp_driver" <--> epuck0AdvancedSercom: State & Controls
   "epuck_cpp_driver" <--> epuck1AdvancedSercom: State & Controls
   "LocalCommsManager" <--> epuck0RobotCommsModel: Heartbeats\n\n\n
@@ -55,15 +59,16 @@ node "e-puck 1" {
   epuck0UDPKnowledgeClient -[hidden]> epuck0UDPKnowledgeServer
   epuck1UDPKnowledgeClient -[hidden]> epuck1UDPKnowledgeServer
 !else
-  "epuck_cpp_driver" <--> "e-puck 0": State & Controls
-  "epuck_cpp_driver" <--> "e-puck 1": State & Controls
-  "LocalCommsManager" <--> "e-puck 0": Heartbeats\n\n\n
-  "LocalCommsManager" <--> "e-puck 1": Heartbeats
-  "e-puck 0" <-> "e-puck 1": Knowledge
+  "epuck_cpp_driver" <-- "High-level Controller": State & Controls
+  "High-level Controller" <- "LocalCommsManager": Knowledge
+  "epuck_cpp_driver" <-> "e-puck 0": State & Controls
+  "epuck_cpp_driver" <-down-> "e-puck 1": State & Controls
+  "LocalCommsManager" <-up-> "e-puck 0": Heartbeats
+  "LocalCommsManager" <-> "e-puck 1": Heartbeats
+  "e-puck 0" <--> "e-puck 1": Knowledge
 !endif
 
-"High-level Controller" --> "epuck_cpp_driver": State & Controls
-"High-level Controller" <-- "LocalCommsManager": Knowledge
+
 
 ' Only show the Gazebo digital twin if enabled
 !if ($enable_digital_twin == 1)
@@ -83,7 +88,7 @@ node "e-puck 1" {
     }
   }
 
-  "High-level Controller" -> Gazebo: State & Controls
+  "High-level Controller" --> Gazebo: State & Controls
 
   gzLocalCommsManager <--> simEpuck0RobotCommsModel: Heartbeats
   gzLocalCommsManager <--> simEpuck1RobotCommsModel: Heartbeats

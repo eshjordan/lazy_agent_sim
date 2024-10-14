@@ -1,5 +1,7 @@
 @startuml
 
+!theme sunlust
+
 participant "Robot[N] Server"
 participant "Robot[N] Client"
 participant "Local Comms Manager"
