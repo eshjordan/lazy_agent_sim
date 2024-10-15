@@ -6,7 +6,7 @@
 
 node "Mocap Camera"
 
-node "Controller PC" {
+node "Centralised Controller PC" as PC {
   component "LocalCommsManager"
 
   component "High-level Controller"
@@ -43,8 +43,8 @@ node "e-puck 1" {
 !if ($enable_digital_twin == 0)
   "High-level Controller" --> "epuck_cpp_driver": State & Controls
   "High-level Controller" <-- "LocalCommsManager": Knowledge
-  "Controller PC" -[hidden]-> "e-puck 0"
-  "Controller PC" -[hidden]-> "e-puck 1"
+  PC -[hidden]-> "e-puck 0"
+  PC -[hidden]-> "e-puck 1"
   "e-puck 0" -[hidden]> "e-puck 1"
 
   "epuck_cpp_driver" <--> epuck0AdvancedSercom: State & Controls
