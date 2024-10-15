@@ -18,8 +18,8 @@ activate "Local Comms Manager"
 
 par Runs continously on a timer
 loop
-"Robot[N] Client" --> "Local Comms Manager": Heartbeat { (ID(N), Host(N), Port(N)) }
-"Local Comms Manager" --> "Robot[N] Client": Response {}
+"Robot[N] Client" --> "Local Comms Manager": EpuckHeartbeatPacket {\n\tID(N), Host(N), Port(N)\n}
+"Local Comms Manager" --> "Robot[N] Client": EpuckHeartbeatResponsePacket { }
 end
 end
 
@@ -31,8 +31,8 @@ activate "Local Comms Manager"
 
 par Runs continously on a timer
 loop
-"Robot[N+1] Client" --> "Local Comms Manager": Heartbeat { (ID(N+1), Host(N+1), Port(N+1)) }
-"Local Comms Manager" --> "Robot[N+1] Client": Response {}
+"Robot[N+1] Client" --> "Local Comms Manager": EpuckHeartbeatPacket {\n\tID(N+1), Host(N+1), Port(N+1)\n}
+"Local Comms Manager" --> "Robot[N+1] Client": EpuckHeartbeatResponsePacket { }
 end
 end
 
@@ -47,26 +47,26 @@ end note
 
 loop
 alt Robot[N+1] sees Robot[N] is within comms range
-"Robot[N+1] Client" --> "Local Comms Manager": Heartbeat { (ID(N+1), Host(N+1), Port(N+1)) }
-"Local Comms Manager" --> "Robot[N+1] Client": Response { (ID(N), Host(N), Port(N), Dist(N+1, N)), (...) }
+"Robot[N+1] Client" --> "Local Comms Manager": EpuckHeartbeatPacket {\n\tID(N+1), Host(N+1), Port(N+1)\n}
+"Local Comms Manager" --> "Robot[N+1] Client": EpuckHeartbeatResponsePacket {\n\t(ID(N), Host(N), Port(N), Dist(N+1, N)), (...) \n}
 par
 "Robot[N+1] Client" -> "Robot[N] Server": Connect
 activate "Robot[N] Server"
 loop
-"Robot[N+1] Client" --> "Robot[N] Server": Knowledge {...}
-"Robot[N] Server" --> "Robot[N+1] Client": Knowledge {...}
+"Robot[N+1] Client" --> "Robot[N] Server": EpuckKnowledgePacket {...}
+"Robot[N] Server" --> "Robot[N+1] Client": EpuckKnowledgePacket {...}
 end
 end
 ...Robot[N+1] sees Robot[N] go out of comms range...
 
-"Robot[N+1] Client" --> "Local Comms Manager": Heartbeat { (ID(N+1), Host(N+1), Port(N+1)) }
-"Local Comms Manager" --> "Robot[N+1] Client": Response {}
+"Robot[N+1] Client" --> "Local Comms Manager": EpuckHeartbeatPacket {\n\tID(N+1), Host(N+1), Port(N+1)\n}
+"Local Comms Manager" --> "Robot[N+1] Client": EpuckHeartbeatResponsePacket {}
 "Robot[N+1] Client" -> "Robot[N] Server": Close
 deactivate "Robot[N] Server"
 
 else Robot[N+1] sees Robot[N] is out of comms range
-"Robot[N+1] Client" --> "Local Comms Manager": Heartbeat { (ID(N+1), Host(N+1), Port(N+1)) }
-"Local Comms Manager" --> "Robot[N+1] Client": Response {}
+"Robot[N+1] Client" --> "Local Comms Manager": EpuckHeartbeatPacket {\n\tID(N+1), Host(N+1), Port(N+1)\n}
+"Local Comms Manager" --> "Robot[N+1] Client": EpuckHeartbeatResponsePacket {}
 end
 end
 
