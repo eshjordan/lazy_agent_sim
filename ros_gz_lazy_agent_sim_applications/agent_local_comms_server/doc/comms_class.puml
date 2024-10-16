@@ -10,7 +10,7 @@ abstract class BaseKnowledgeServer {
 }
 
 abstract class BaseKnowledgeClient {
-  + BaseKnowledgeClient(\n\tEpuckNeighbourPacket neighbour,\n\tstd::function<bool()> running,\n\tstd::shared_ptr<BaseRobotCommsModel> robot_model)
+  + BaseKnowledgeClient(EpuckNeighbourPacket neighbour, std::function<bool()> running, std::shared_ptr<BaseRobotCommsModel> robot_model)
   + {abstract} void start()
   + {abstract} void stop()
   # EpuckNeighbourPacket neighbour
