@@ -14,7 +14,7 @@ abstract class BaseKnowledgeClient {
   + {abstract} void start()
   + {abstract} void stop()
   # EpuckNeighbourPacket neighbour
-  # std::function<bool()> running
+  # {field} std::function<bool()> running
   # std::shared_ptr<BaseRobotCommsModel> robot_model
 }
 
@@ -84,7 +84,7 @@ class UDPKnowledgeServer <T : BaseRobotCommsModel> {
   + void stop()
   - void launch_start_receive()
   - void start_receive()
-  - void handle_receive(asio::ip::udp::endpoint client,\n\t std::array<uint8_t, sizeof(EpuckKnowledgePacket)> data)
+  - void handle_receive(asio::ip::udp::endpoint client, std::array<uint8_t, sizeof(EpuckKnowledgePacket)> data)
   - asio::io_context io_context_
   - asio::ip::udp::socket *socket_
   - std::thread heartbeat_thread_
@@ -93,7 +93,7 @@ class UDPKnowledgeServer <T : BaseRobotCommsModel> {
 }
 
 class UDPKnowledgeClient <T : BaseRobotCommsModel> {
-  + UDPKnowledgeClient(\n\tEpuckNeighbourPacket neighbour,\n\tstd::function<bool()> running,\n\tstd::shared_ptr<T> robot_model)
+  + UDPKnowledgeClient(EpuckNeighbourPacket neighbour, std::function<bool()> running, std::shared_ptr<T> robot_model)
   + void start()
   + void stop()
   - void launch_send_knowledge()
@@ -118,7 +118,7 @@ class GZKnowledgeServer <T : BaseRobotCommsModel> {
 }
 
 class GZKnowledgeClient <T : BaseRobotCommsModel> {
-  + GZKnowledgeClient(\n\tEpuckNeighbourPacket neighbour,\n\tstd::function<bool()> running,\n\tstd::shared_ptr<T> robot_model)
+  + GZKnowledgeClient(EpuckNeighbourPacket neighbour, std::function<bool()> running, std::shared_ptr<T> robot_model)
   + void start()
   + void stop()
   - void send_knowledge()
