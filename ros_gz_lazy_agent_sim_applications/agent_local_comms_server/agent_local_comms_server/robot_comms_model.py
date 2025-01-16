@@ -106,8 +106,10 @@ class RobotCommsModel:
                 (self.manager_host, self.manager_port),
             )
 
-            data_to_read = select.select([self.heartbeat_client], [], [], 0.01)[0]
-            if not data_to_read:
+            r_ready, w_ready, x_ready = select.select(
+                [self.heartbeat_client], [], [], 0.01
+            )
+            if len(r_ready) == 0:
                 continue
 
             data, retaddr = self.heartbeat_client.recvfrom(
@@ -151,9 +153,7 @@ class RobotCommsModel:
             ]
 
             for neighbour_id in out_of_range_neighbour_ids:
-                self.logger.info(
-                    f"Stopping thread for neighbour {neighbour_id}"
-                )
+                self.logger.info(f"Stopping thread for neighbour {neighbour_id}")
                 knowledge_client = self.knowledge_clients.pop(neighbour_id)
                 knowledge_client.stop()
 

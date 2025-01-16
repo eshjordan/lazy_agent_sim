@@ -16,6 +16,10 @@ def generate_launch_description():
                 "robot_tf_prefix": "epuck2_robot_",
                 "robot_tf_suffix": "",
                 "robot_tf_frame": "base_link",
+                "remap_ids/0": "0",
+                "remap_ids/1": "1",
+                "remap_ids/2": "2",
+                "remap_ids/3": "3",
             }.items(),
         )
     )
@@ -48,8 +52,25 @@ def generate_launch_description():
                         "robot_tf_frame": launch.substitutions.LaunchConfiguration(
                             "robot_tf_frame"
                         ),
+                        "remap_ids/0": launch.substitutions.LaunchConfiguration(
+                            "remap_ids/0"
+                        ),
+                        "remap_ids/1": launch.substitutions.LaunchConfiguration(
+                            "remap_ids/1"
+                        ),
+                        "remap_ids/2": launch.substitutions.LaunchConfiguration(
+                            "remap_ids/2"
+                        ),
+                        "remap_ids/3": launch.substitutions.LaunchConfiguration(
+                            "remap_ids/3"
+                        ),
                     }
                 ],
+                # arguments=[
+                #     "--ros-args",
+                #     "--log-level",
+                #     "debug",
+                # ],
             ),
         ]
     )

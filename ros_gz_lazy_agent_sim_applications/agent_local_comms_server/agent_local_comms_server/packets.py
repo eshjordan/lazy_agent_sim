@@ -6,14 +6,18 @@ ENDIAN_FMT = "<"
 MAX_ROBOTS = 10
 MAX_HOST_LEN = 18
 
-EPUCK_HEARTBEAT_PACKET_FMT_STR: str = ENDIAN_FMT + f"BB{MAX_HOST_LEN+1}sH"
+ROBOT_ID_TYPE_FMT_STR: str = "H"  # ushort
+
+EPUCK_HEARTBEAT_PACKET_FMT_STR: str = (
+    ENDIAN_FMT + f"B{ROBOT_ID_TYPE_FMT_STR}{MAX_HOST_LEN+1}sH"
+)
 EPUCK_HEARTBEAT_PACKET_ID: int = 0x20
 
 
 @dataclass
 class EpuckHeartbeatPacket:
     id: int = 0x20  # byte
-    robot_id: int = 0x0  # byte
+    robot_id: int = 0x0  # see above
     robot_host: str = ""  # str
     robot_port: int = 0  # ushort
 
@@ -34,7 +38,7 @@ class EpuckHeartbeatPacket:
             )
         args = struct.unpack(EPUCK_HEARTBEAT_PACKET_FMT_STR, buffer)
         obj = cls(*args)
-        obj.robot_host = obj.robot_host.decode("ascii")
+        obj.robot_host = obj.robot_host.decode("ascii").rstrip("\x00")  # type: ignore
         return obj
 
     @classmethod
@@ -87,12 +91,14 @@ class EpuckHeartbeatResponsePacket:
         )
 
 
-EPUCK_NEIGHBOUR_PACKET_FMT_STR: str = ENDIAN_FMT + f"B{MAX_HOST_LEN+1}sHf"
+EPUCK_NEIGHBOUR_PACKET_FMT_STR: str = (
+    ENDIAN_FMT + f"{ROBOT_ID_TYPE_FMT_STR}{MAX_HOST_LEN+1}sHf"
+)
 
 
 @dataclass
 class EpuckNeighbourPacket:
-    robot_id: int = 0  # byte
+    robot_id: int = 0  # see above
     host: str = ""  # str
     port: int = 0  # ushort
     dist: float = 0.0  # float
@@ -110,7 +116,7 @@ class EpuckNeighbourPacket:
     def unpack(cls, buffer: bytes):
         args = struct.unpack(EPUCK_NEIGHBOUR_PACKET_FMT_STR, buffer)
         obj = cls(*args)
-        obj.host = obj.host.decode("ascii")
+        obj.host = obj.host.decode("ascii").rstrip("\x00")  # type: ignore
         return obj
 
     @classmethod
@@ -118,7 +124,7 @@ class EpuckNeighbourPacket:
         return struct.calcsize(EPUCK_NEIGHBOUR_PACKET_FMT_STR)
 
 
-EPUCK_KNOWLEDGE_PACKET_FMT_STR: str = ENDIAN_FMT + "BBB"
+EPUCK_KNOWLEDGE_PACKET_FMT_STR: str = ENDIAN_FMT + f"B{ROBOT_ID_TYPE_FMT_STR}B"
 EPUCK_KNOWLEDGE_PACKET_ID: int = 0x22
 
 
@@ -126,7 +132,7 @@ EPUCK_KNOWLEDGE_PACKET_ID: int = 0x22
 class EpuckKnowledgePacket:
     known_ids: list[int]  # list of byte
     id: int = 0x22  # byte
-    robot_id: int = 0  # byte
+    robot_id: int = 0  # see above
     N: int = 0x0  # byte
 
     def pack(self):
@@ -144,15 +150,25 @@ class EpuckKnowledgePacket:
                 f"Invalid message id: {buffer[0]}, expected {EPUCK_KNOWLEDGE_PACKET_ID}"
             )
 
-        id, robot_id, N = struct.unpack(EPUCK_KNOWLEDGE_PACKET_FMT_STR, buffer[:3])
-        return cls(id=id, robot_id=robot_id, N=N, known_ids=list(buffer[3 : N + 3]))
+        start_len = struct.calcsize(EPUCK_ADDRESS_KNOWLEDGE_PACKET_FMT_STR)
+        id, robot_id, N = struct.unpack(
+            EPUCK_KNOWLEDGE_PACKET_FMT_STR, buffer[:start_len]
+        )
+        return cls(
+            id=id,
+            robot_id=robot_id,
+            N=N,
+            known_ids=list(buffer[start_len : N + start_len]),
+        )
 
     @classmethod
     def calcsize(cls):
         return struct.calcsize(EPUCK_KNOWLEDGE_PACKET_FMT_STR) + MAX_ROBOTS
 
 
-EPUCK_ADDRESS_KNOWLEDGE_PACKET_FMT_STR: str = ENDIAN_FMT + f"BBB{MAX_HOST_LEN+1}s"
+EPUCK_ADDRESS_KNOWLEDGE_PACKET_FMT_STR: str = (
+    ENDIAN_FMT + f"B{ROBOT_ID_TYPE_FMT_STR}B{MAX_HOST_LEN+1}s"
+)
 EPUCK_ADDRESS_KNOWLEDGE_PACKET_ID: int = 0x22
 
 
@@ -160,7 +176,7 @@ EPUCK_ADDRESS_KNOWLEDGE_PACKET_ID: int = 0x22
 class EpuckAddressKnowledgePacket:
     known_ids: list[int]  # list of byte
     id: int = 0x23  # byte
-    robot_id: int = 0  # byte
+    robot_id: int = 0  # see above
     N: int = 0x0  # byte
     address: str = ""  # str
 
@@ -183,7 +199,7 @@ class EpuckAddressKnowledgePacket:
         id, robot_id, N, address = struct.unpack(
             EPUCK_ADDRESS_KNOWLEDGE_PACKET_FMT_STR, buffer[:start_len]
         )
-        address = address.decode("ascii")
+        address = address.decode("ascii").rstrip("\x00")  # type: ignore
         return cls(
             id=id,
             robot_id=robot_id,

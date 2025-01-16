@@ -147,6 +147,10 @@ class UDPKnowledgeClient(BaseKnowledgeClient):
 
             time.sleep(1)
 
+        self.robot_model.logger.info(
+            f"Stopping knowledge connection with {self.neighbour.robot_id} ({self.neighbour.host}:{self.neighbour.port})"
+        )
+
 
 def main():
     rclpy.init()

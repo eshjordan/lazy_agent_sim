@@ -37,11 +37,13 @@ def generate_launch_description():
             launch.substitutions.LaunchConfiguration("manager_robot_tf_suffix"),
         )
 
-    def launch_robot_comms(id: int, teleop: bool = True):
-        node = launch_ros.actions.Node(
+    def launch_robot_comms(
+        i: int, robot_id: int, node: bool = True, teleop: bool = True
+    ) -> list[launch.Action]:
+        _node = launch_ros.actions.Node(
             package="agent_local_comms_server",
             executable="udp_agent_comms",
-            name=f"knowledge_comms_robot{id}",
+            name=f"knowledge_comms_robot{i}",
             output="screen",
             # prefix=[
             #     # Debugging with gdb
@@ -54,7 +56,7 @@ def generate_launch_description():
             # ],
             parameters=[
                 {
-                    "robot_id": id,
+                    "robot_id": robot_id,
                     "manager_host": launch.substitutions.LaunchConfiguration(
                         "manager_server_host"
                     ),
@@ -62,10 +64,10 @@ def generate_launch_description():
                         "manager_server_port"
                     ),
                     "robot_host": launch.substitutions.LaunchConfiguration(
-                        f"robot{id}_host"
+                        f"robot{i}_host"
                     ),
                     "robot_port": launch.substitutions.LaunchConfiguration(
-                        f"robot{id}_port"
+                        f"robot{i}_port"
                     ),
                 }
             ],
@@ -76,7 +78,7 @@ def generate_launch_description():
                 cmd=[
                     "xterm",
                     '-bg black -fg white -fa "Monospace" -fs 13 -title "',
-                    (*get_namespace(id), '/mobile_base/cmd_vel"'),
+                    (*get_namespace(i), '/mobile_base/cmd_vel"'),
                     '-e "',
                     "ros2",
                     "run",
@@ -84,13 +86,13 @@ def generate_launch_description():
                     "teleop_twist_keyboard",
                     "--ros-args",
                     "-r",
-                    ("__ns:=/", *get_namespace(id), "/mobile_base"),
+                    ("__ns:=/", *get_namespace(i), "/mobile_base"),
                     "-r",
                     "stamped:=true",
                     "-r",
                     (
                         "frame_id:=",
-                        *get_namespace(id),
+                        *get_namespace(i),
                         launch.substitutions.LaunchConfiguration(
                             "manager_robot_tf_frame"
                         ),
@@ -101,14 +103,21 @@ def generate_launch_description():
             shell=True,
         )
 
-        return [node, _teleop] if teleop else [node]
+        result = []
+
+        if node:
+            result.append(_node)
+        if teleop:
+            result.append(_teleop)
+
+        return result
 
     ld = launch.LaunchDescription(
         launch_args
-        + launch_robot_comms(0)
-        + launch_robot_comms(1)
-        + launch_robot_comms(2)
-        + launch_robot_comms(3)
+        + launch_robot_comms(0, 0)
+        + launch_robot_comms(1, 1)
+        + launch_robot_comms(2, 2)
+        + launch_robot_comms(3, 3)
         + [
             launch.actions.IncludeLaunchDescription(
                 launch.launch_description_sources.PythonLaunchDescriptionSource(
@@ -139,6 +148,10 @@ def generate_launch_description():
                     "robot_tf_frame": launch.substitutions.LaunchConfiguration(
                         "manager_robot_tf_frame"
                     ),
+                    "remap_ids/0": "0",
+                    "remap_ids/1": "1",
+                    "remap_ids/2": "2",
+                    "remap_ids/3": "3",
                 }.items(),
             ),
             launch.actions.IncludeLaunchDescription(
@@ -151,6 +164,24 @@ def generate_launch_description():
                         ]
                     )
                 ),
+                launch_arguments={
+                    "robot_id0": "0",
+                    "robot_addr0": "127.0.0.1",
+                    "robot_port0": "10000",
+                    "robot_sim_en0": "true",
+                    "robot_id1": "1",
+                    "robot_addr1": "127.0.0.1",
+                    "robot_port1": "10001",
+                    "robot_sim_en1": "true",
+                    "robot_id2": "2",
+                    "robot_addr2": "127.0.0.1",
+                    "robot_port2": "10002",
+                    "robot_sim_en2": "true",
+                    "robot_id3": "3",
+                    "robot_addr3": "127.0.0.1",
+                    "robot_port3": "10003",
+                    "robot_sim_en3": "true",
+                }.items(),
             ),
         ]
     )

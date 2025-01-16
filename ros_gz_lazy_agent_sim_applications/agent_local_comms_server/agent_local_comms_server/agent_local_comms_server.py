@@ -28,6 +28,10 @@ class LocalCommsManager(rclpy.node.Node):
         self.declare_parameter("robot_tf_prefix", "epuck2_robot_")
         self.declare_parameter("robot_tf_suffix", "")
         self.declare_parameter("robot_tf_frame", "base_link")
+        self.declare_parameter("remap_ids/0", 0)
+        self.declare_parameter("remap_ids/1", 1)
+        self.declare_parameter("remap_ids/2", 2)
+        self.declare_parameter("remap_ids/3", 3)
 
         self.tf_buffer = tf2_ros.buffer.Buffer()
         self.tf_listener = tf2_ros.transform_listener.TransformListener(
@@ -73,9 +77,20 @@ class LocalCommsManager(rclpy.node.Node):
         self.server = None
 
     def frame_name(self, id: int) -> str:
+        remappings = self.get_parameters([f"remap_ids/{id}" for id in range(4)])
+        mapped_id_value = None
+
+        for remap in remappings:
+            if remap.value == id:
+                mapped_id_value = remap.name.split("/")[-1]
+                break
+
+        if mapped_id_value is None:
+            mapped_id_value = str(id)
+
         return (
             f"{self.get_parameter("robot_tf_prefix").value}"
-            + f"{id}"
+            + f"{mapped_id_value}"
             + f"{self.get_parameter("robot_tf_suffix").value}"
             + f"{self.get_parameter("robot_tf_frame").value}"
         )
