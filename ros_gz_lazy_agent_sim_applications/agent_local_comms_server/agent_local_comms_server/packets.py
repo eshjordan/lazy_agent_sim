@@ -130,7 +130,7 @@ EPUCK_KNOWLEDGE_PACKET_ID: int = 0x22
 
 @dataclass
 class EpuckKnowledgePacket:
-    known_ids: list[int]  # list of byte
+    known_ids: list[int]  # list of robot_id_type
     id: int = 0x22  # byte
     robot_id: int = 0  # see above
     N: int = 0x0  # byte
@@ -141,7 +141,7 @@ class EpuckKnowledgePacket:
             self.id,
             self.robot_id,
             self.N,
-        ) + bytes(self.known_ids)
+        ) + struct.pack(ROBOT_ID_TYPE_FMT_STR * self.N, *self.known_ids)
 
     @classmethod
     def unpack(cls, buffer: bytes):
@@ -150,20 +150,26 @@ class EpuckKnowledgePacket:
                 f"Invalid message id: {buffer[0]}, expected {EPUCK_KNOWLEDGE_PACKET_ID}"
             )
 
-        start_len = struct.calcsize(EPUCK_ADDRESS_KNOWLEDGE_PACKET_FMT_STR)
+        start_len = struct.calcsize(EPUCK_KNOWLEDGE_PACKET_FMT_STR)
         id, robot_id, N = struct.unpack(
             EPUCK_KNOWLEDGE_PACKET_FMT_STR, buffer[:start_len]
         )
+        known_id_buffer = buffer[
+            start_len : struct.calcsize(ROBOT_ID_TYPE_FMT_STR) * N + start_len
+        ]
         return cls(
             id=id,
             robot_id=robot_id,
             N=N,
-            known_ids=list(buffer[start_len : N + start_len]),
+            known_ids=list(struct.unpack(ROBOT_ID_TYPE_FMT_STR * N, known_id_buffer)),
         )
 
     @classmethod
     def calcsize(cls):
-        return struct.calcsize(EPUCK_KNOWLEDGE_PACKET_FMT_STR) + MAX_ROBOTS
+        return (
+            struct.calcsize(EPUCK_KNOWLEDGE_PACKET_FMT_STR)
+            + struct.calcsize(ROBOT_ID_TYPE_FMT_STR) * MAX_ROBOTS
+        )
 
 
 EPUCK_ADDRESS_KNOWLEDGE_PACKET_FMT_STR: str = (
