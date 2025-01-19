@@ -42,6 +42,8 @@ class LocalCommsManager(rclpy.node.Node):
         self.server_thread = None
         self.known_robots: set[tuple[int, str, int]] = set()
 
+        self.current_neighbours: dict[int, set[int]] = {}
+
         self.start()
 
     # Destructor
@@ -174,6 +176,28 @@ class LocalCommsManager(rclpy.node.Node):
                     for id, host, port, dist in distances
                     if dist <= threshold_dist
                 ]
+
+                if heartbeat.robot_id not in manager.current_neighbours.keys():
+                    manager.current_neighbours[heartbeat.robot_id] = set()
+
+                neighbours_set = set([id for id, _, _, _ in neighbours])
+                new_out_of_range = manager.current_neighbours[
+                    heartbeat.robot_id
+                ].difference(neighbours_set)
+                new_in_range = neighbours_set.difference(
+                    manager.current_neighbours[heartbeat.robot_id]
+                )
+                manager.current_neighbours[heartbeat.robot_id] = neighbours_set
+
+                for id in new_out_of_range:
+                    manager.get_logger().info(
+                        f"Robot {heartbeat.robot_id} going out of range of {id}"
+                    )
+
+                for id in new_in_range:
+                    manager.get_logger().info(
+                        f"Robot {heartbeat.robot_id} coming into range of {id}"
+                    )
 
                 # Send response with all neighbour ids and distances
                 neighbour_packets = [
