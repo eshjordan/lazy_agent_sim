@@ -1,5 +1,5 @@
 from launch_ros.substitutions import FindPackageShare
-from launch.substitutions import PathJoinSubstitution
+from launch.substitutions import PathJoinSubstitution, FileContent
 import launch
 import launch_ros.actions
 
@@ -17,7 +17,7 @@ def generate_launch_description():
                 "manager_threshold_dist": "0.1",
                 "manager_robot_tf_prefix": "epuck2_robot_",
                 "manager_robot_tf_suffix": "",
-                "manager_robot_tf_frame": "",
+                "manager_robot_tf_frame": "/base_link",
                 "robot0_host": "aa:bb:cc:dd:ee:00",
                 "robot0_port": "0",
                 "robot1_host": "aa:bb:cc:dd:ee:01",
@@ -37,15 +37,21 @@ def generate_launch_description():
             launch.substitutions.LaunchConfiguration("manager_robot_tf_suffix"),
         )
 
-    def launch_robot_comms(id: int, teleop: bool = True):
-        node = launch_ros.actions.Node(
+    def launch_robot_comms(
+        i: int, robot_id: int, node: bool = True, teleop: bool = True
+    ) -> list[launch.Action]:
+        _node = launch_ros.actions.Node(
             package="agent_local_comms_server",
             executable="gz_agent_comms",
-            name=f"knowledge_comms_robot{id}",
+            name=f"knowledge_comms_robot{i}",
             output="screen",
+            # prefix=[
+            #     # Debugging with gdb
+            #     "xterm -bg black -fg white -fa 'Monospace' -fs 13 -e gdb -ex start --args"
+            # ],
             parameters=[
                 {
-                    "robot_id": id,
+                    "robot_id": robot_id,
                     "manager_host": launch.substitutions.LaunchConfiguration(
                         "manager_server_host"
                     ),
@@ -53,18 +59,18 @@ def generate_launch_description():
                         "manager_server_port"
                     ),
                     "robot_host": launch.substitutions.LaunchConfiguration(
-                        f"robot{id}_host"
+                        f"robot{i}_host"
                     ),
                     "robot_port": launch.substitutions.LaunchConfiguration(
-                        f"robot{id}_port"
+                        f"robot{i}_port"
                     ),
                 }
             ],
-            arguments=[
-                "--ros-args",
-                "--log-level",
-                "debug",
-            ],
+            # arguments=[
+            #     "--ros-args",
+            #     "--log-level",
+            #     "debug",
+            # ],
         )
 
         _teleop = launch.actions.ExecuteLocal(
@@ -72,7 +78,7 @@ def generate_launch_description():
                 cmd=[
                     "xterm",
                     '-bg black -fg white -fa "Monospace" -fs 13 -title "',
-                    (*get_namespace(id), '/mobile_base/cmd_vel"'),
+                    (*get_namespace(i), '/mobile_base/cmd_vel"'),
                     '-e "',
                     "ros2",
                     "run",
@@ -80,14 +86,13 @@ def generate_launch_description():
                     "teleop_twist_keyboard",
                     "--ros-args",
                     "-r",
-                    ("__ns:=/", *get_namespace(id), "/mobile_base"),
+                    ("__ns:=/", *get_namespace(i), "/mobile_base"),
                     "-r",
                     "stamped:=true",
                     "-r",
                     (
                         "frame_id:=",
-                        *get_namespace(id),
-                        "/",
+                        *get_namespace(i),
                         launch.substitutions.LaunchConfiguration(
                             "manager_robot_tf_frame"
                         ),
@@ -98,6 +103,34 @@ def generate_launch_description():
             shell=True,
         )
 
+        robot_description = launch_ros.actions.Node(
+            namespace=[*get_namespace(i)],
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            name=f"epuck_state_publisher_{i}",
+            parameters=[
+                {"use_sim_time": True},
+                {
+                    "frame_prefix": [
+                        *get_namespace(i),
+                        "/",
+                    ],
+                    "robot_description": FileContent(
+                        [
+                            PathJoinSubstitution(
+                                [
+                                    FindPackageShare("ros_gz_lazy_agent_sim_description"),
+                                    "models",
+                                    "epuck2",
+                                    "epuck2.urdf",
+                                ]
+                            ),
+                        ]
+                    ),
+                },
+            ],
+        )
+
         global_tf = launch_ros.actions.Node(
             package="tf2_ros",
             executable="static_transform_publisher",
@@ -105,20 +138,29 @@ def generate_launch_description():
             output="screen",
             arguments=[
                 "--frame-id",
-                "world",
+                "odom",
                 "--child-frame-id",
-                (*get_namespace(id), "/odom"),
+                (*get_namespace(i), "/odom"),
             ],
         )
 
-        return [node, _teleop, global_tf] if teleop else [node, global_tf]
+        result = []
+
+        if node:
+            result.append(_node)
+        if teleop:
+            result.append(_teleop)
+        result.append(robot_description)
+        result.append(global_tf)
+
+        return result
 
     ld = launch.LaunchDescription(
         launch_args
-        + launch_robot_comms(0, teleop=False)
-        + launch_robot_comms(1, teleop=False)
-        # + launch_robot_comms(2, teleop=False)
-        # + launch_robot_comms(3, teleop=False)
+        + launch_robot_comms(0, 0)
+        + launch_robot_comms(1, 1)
+        + launch_robot_comms(2, 2)
+        + launch_robot_comms(3, 3)
         + [
             launch.actions.IncludeLaunchDescription(
                 launch.launch_description_sources.PythonLaunchDescriptionSource(
@@ -149,7 +191,23 @@ def generate_launch_description():
                     "robot_tf_frame": launch.substitutions.LaunchConfiguration(
                         "manager_robot_tf_frame"
                     ),
+                    "remap_ids/0": "0",
+                    "remap_ids/1": "1",
+                    "remap_ids/2": "2",
+                    "remap_ids/3": "3",
                 }.items(),
+            ),
+            launch_ros.actions.Node(
+                package="tf2_ros",
+                executable="static_transform_publisher",
+                name="static_transform_publisher",
+                output="screen",
+                arguments=[
+                    "--frame-id",
+                    "world",
+                    "--child-frame-id",
+                    "odom",
+                ],
             ),
         ]
     )

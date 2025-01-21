@@ -3,9 +3,9 @@ index 394b654..b433e37 100644
 --- ros_gz_lazy_agent_sim_description/models/epuck2/epuck2.sdf
 +++ ros_gz_lazy_agent_sim_description/models/epuck2/epuck2.sdf
 @@ -1,6 +1,364 @@
--<sdf version='1.11'>
+-<sdf version='1.12'>
 +<sdf
-+  version='1.11'
++  version='1.12'
 +  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 +  xsi:noNamespaceSchemaLocation="http://sdformat.org/schemas/root.xsd"
 +>

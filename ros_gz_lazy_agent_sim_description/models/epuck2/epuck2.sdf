@@ -1,5 +1,5 @@
 <sdf
-  version='1.11'
+  version='1.12'
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="http://sdformat.org/schemas/root.xsd"
 >
@@ -403,13 +403,13 @@
         <pose>0 0 0.021999999999999999 3.1415890000000002 0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.040000000000000001</length>
+            <length>0.032000000000000001</length>
             <radius>0.036999999999999998</radius>
           </cylinder>
         </geometry>
         <material>
-          <diffuse>1 1 1 0.5</diffuse>
-          <ambient>1 1 1 0.5</ambient>
+          <diffuse>1 1 1 0.300000012</diffuse>
+          <ambient>1 1 1 0.300000012</ambient>
         </material>
       </visual>
       <visual name='base_link_visual_1'>

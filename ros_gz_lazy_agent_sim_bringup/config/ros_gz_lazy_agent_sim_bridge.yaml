@@ -1,5 +1,5 @@
 ---
-- ros_topic_name: "/epuck2_robot_0/cmd_vel"
+- ros_topic_name: "/epuck2_robot_0/mobile_base/cmd_vel"
   gz_topic_name: "/model/epuck2_robot_0/cmd_vel"
   ros_type_name: "geometry_msgs/msg/Twist"
   gz_type_name: "gz.msgs.Twist"
@@ -9,7 +9,7 @@
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
-- ros_topic_name: "/epuck2_robot_0/odometry"
+- ros_topic_name: "/epuck2_robot_0/odom"
   gz_topic_name: "/model/epuck2_robot_0/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
   gz_type_name: "gz.msgs.Odometry"
@@ -30,8 +30,18 @@
   gz_type_name: "gz.msgs.Pose_V"
   direction: GZ_TO_ROS
 
+- ros_topic_name: "/epuck2_robot_0/proximity0"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox0/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_0/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox0/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_0/proximity1"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox1/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -40,8 +50,18 @@
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_0/proximity2"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox2/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_0/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox2/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_0/proximity3"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox3/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -50,8 +70,18 @@
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_0/proximity4"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox4/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_0/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox4/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_0/proximity5"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox5/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -60,8 +90,18 @@
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_0/proximity6"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox6/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_0/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox6/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_0/proximity7"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/prox7/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -71,6 +111,11 @@
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
 
+- ros_topic_name: "/epuck2_robot_0/dist_sens"
+  gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/tof/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_0/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_0/link/base_link/sensor/tof/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
@@ -88,7 +133,7 @@
 
 
 
-- ros_topic_name: "/epuck2_robot_1/cmd_vel"
+- ros_topic_name: "/epuck2_robot_1/mobile_base/cmd_vel"
   gz_topic_name: "/model/epuck2_robot_1/cmd_vel"
   ros_type_name: "geometry_msgs/msg/Twist"
   gz_type_name: "gz.msgs.Twist"
@@ -98,7 +143,7 @@
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
-- ros_topic_name: "/epuck2_robot_1/odometry"
+- ros_topic_name: "/epuck2_robot_1/odom"
   gz_topic_name: "/model/epuck2_robot_1/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
   gz_type_name: "gz.msgs.Odometry"
@@ -119,8 +164,18 @@
   gz_type_name: "gz.msgs.Pose_V"
   direction: GZ_TO_ROS
 
+- ros_topic_name: "/epuck2_robot_1/proximity0"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox0/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_1/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox0/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_1/proximity1"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox1/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -129,8 +184,18 @@
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_1/proximity2"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox2/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_1/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox2/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_1/proximity3"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox3/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -139,8 +204,18 @@
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_1/proximity4"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox4/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_1/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox4/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_1/proximity5"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox5/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -149,8 +224,18 @@
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_1/proximity6"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox6/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_1/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox6/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_1/proximity7"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/prox7/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
@@ -160,6 +245,11 @@
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
 
+- ros_topic_name: "/epuck2_robot_1/dist_sens"
+  gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/tof/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_1/scan"
   gz_topic_name: "/world/arena/model/epuck2_robot_1/link/base_link/sensor/tof/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"

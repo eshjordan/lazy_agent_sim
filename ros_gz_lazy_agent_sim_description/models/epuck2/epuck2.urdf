@@ -12,10 +12,10 @@
     <visual>
       <origin xyz="0 0 0.022" rpy="3.141589 0 0" />
       <geometry>
-        <cylinder radius="0.037" length="0.040" />
+        <cylinder radius="0.037" length="0.032" />
       </geometry>
       <material name="light_grey">
-        <color rgba="0.8 0.8 0.8 0.5" />
+        <color rgba="0.8 0.8 0.8 0.3" />
       </material>
     </visual>
     <collision>

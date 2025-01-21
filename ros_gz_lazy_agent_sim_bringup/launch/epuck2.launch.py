@@ -33,7 +33,7 @@ def generate_launch_description():
     launch_args = [
         DeclareLaunchArgument("rviz", default_value="true", description="Open RViz."),
         DeclareLaunchArgument(
-            "gz_version", default_value="8", description="Gazebo version."
+            "gz_version", default_value="9", description="Gazebo version."
         ),
         SetEnvironmentVariable("GZ_VERSION", LaunchConfiguration("gz_version")),
     ]
@@ -102,18 +102,6 @@ def generate_launch_description():
         ],
     )
 
-    # Takes the description and joint angles as inputs and publishes the 3D poses of the robot links
-    robot_state_publisher = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        name="robot_state_publisher",
-        output="both",
-        parameters=[
-            {"use_sim_time": True},
-            {"robot_description": robot_desc},
-        ],
-    )
-
     # Visualize in RViz
     rviz = Node(
         package="rviz2",
@@ -128,7 +116,9 @@ def generate_launch_description():
     # Inter-agent comms through Gazebo
     inter_agent_comms = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            PathJoinSubstitution([agent_local_comms_server, "launch", "gz_agents.launch.py"]),
+            PathJoinSubstitution(
+                [agent_local_comms_server, "launch", "gz_agents.launch.py"]
+            ),
         ),
     )
 
@@ -137,7 +127,6 @@ def generate_launch_description():
         + [
             gz_sim,
             gz_container,
-            robot_state_publisher,
             rviz,
             inter_agent_comms,
         ]
