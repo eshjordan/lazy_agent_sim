@@ -15,7 +15,7 @@ def generate_launch_description():
                 "threshold_dist": "0.5",
                 "robot_tf_prefix": "epuck2_robot_",
                 "robot_tf_suffix": "",
-                "robot_tf_frame": "base_link",
+                "robot_tf_frame": "/base_link",
                 "remap_ids/0": "0",
                 "remap_ids/1": "1",
                 "remap_ids/2": "2",

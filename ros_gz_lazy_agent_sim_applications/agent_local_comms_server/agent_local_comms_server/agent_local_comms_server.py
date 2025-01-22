@@ -27,7 +27,7 @@ class LocalCommsManager(rclpy.node.Node):
         self.declare_parameter("threshold_dist", 0.5)
         self.declare_parameter("robot_tf_prefix", "epuck2_robot_")
         self.declare_parameter("robot_tf_suffix", "")
-        self.declare_parameter("robot_tf_frame", "base_link")
+        self.declare_parameter("robot_tf_frame", "/base_link")
         self.declare_parameter("remap_ids/0", 0)
         self.declare_parameter("remap_ids/1", 1)
         self.declare_parameter("remap_ids/2", 2)

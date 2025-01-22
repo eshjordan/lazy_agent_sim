@@ -6,6 +6,8 @@
   <model name='epuck2'>
     <link name='base_link'>
 
+      <pose>0 0 0 0 0 0</pose>
+
       <!-- Sensors -->
       <sensor name='prox0' type='gpu_lidar'>
         <always_on>true</always_on>

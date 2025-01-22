@@ -20,11 +20,16 @@
   gz_type_name: "gz.msgs.Model"
   direction: GZ_TO_ROS
 - ros_topic_name: "/tf"
-  gz_topic_name: "/model/epuck2_robot_0/pose"
+  gz_topic_name: "/model/epuck2_robot_0/tf"
   ros_type_name: "tf2_msgs/msg/TFMessage"
   gz_type_name: "gz.msgs.Pose_V"
   direction: GZ_TO_ROS
-- ros_topic_name: "/tf_static"
+# - ros_topic_name: "/tf"
+#   gz_topic_name: "/model/epuck2_robot_0/pose"
+#   ros_type_name: "tf2_msgs/msg/TFMessage"
+#   gz_type_name: "gz.msgs.Pose_V"
+#   direction: GZ_TO_ROS
+- ros_topic_name: "/tf"
   gz_topic_name: "/model/epuck2_robot_0/pose_static"
   ros_type_name: "tf2_msgs/msg/TFMessage"
   gz_type_name: "gz.msgs.Pose_V"
@@ -154,11 +159,16 @@
   gz_type_name: "gz.msgs.Model"
   direction: GZ_TO_ROS
 - ros_topic_name: "/tf"
-  gz_topic_name: "/model/epuck2_robot_1/pose"
+  gz_topic_name: "/model/epuck2_robot_1/tf"
   ros_type_name: "tf2_msgs/msg/TFMessage"
   gz_type_name: "gz.msgs.Pose_V"
   direction: GZ_TO_ROS
-- ros_topic_name: "/tf_static"
+# - ros_topic_name: "/tf"
+#   gz_topic_name: "/model/epuck2_robot_1/pose"
+#   ros_type_name: "tf2_msgs/msg/TFMessage"
+#   gz_type_name: "gz.msgs.Pose_V"
+#   direction: GZ_TO_ROS
+- ros_topic_name: "/tf"
   gz_topic_name: "/model/epuck2_robot_1/pose_static"
   ros_type_name: "tf2_msgs/msg/TFMessage"
   gz_type_name: "gz.msgs.Pose_V"

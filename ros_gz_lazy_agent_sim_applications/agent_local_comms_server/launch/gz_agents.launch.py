@@ -104,7 +104,6 @@ def generate_launch_description():
         )
 
         robot_description = launch_ros.actions.Node(
-            namespace=[*get_namespace(i)],
             package="robot_state_publisher",
             executable="robot_state_publisher",
             name=f"epuck_state_publisher_{i}",
@@ -113,13 +112,19 @@ def generate_launch_description():
                 {
                     "frame_prefix": [
                         *get_namespace(i),
+                        launch.substitutions.LaunchConfiguration(
+                            "manager_robot_tf_frame"
+                        ),
                         "/",
                     ],
+                    "publish_frequency": 60.0,
                     "robot_description": FileContent(
                         [
                             PathJoinSubstitution(
                                 [
-                                    FindPackageShare("ros_gz_lazy_agent_sim_description"),
+                                    FindPackageShare(
+                                        "ros_gz_lazy_agent_sim_description"
+                                    ),
                                     "models",
                                     "epuck2",
                                     "epuck2.urdf",
@@ -131,16 +136,23 @@ def generate_launch_description():
             ],
         )
 
-        global_tf = launch_ros.actions.Node(
+        base_link_tf = launch_ros.actions.Node(
             package="tf2_ros",
             executable="static_transform_publisher",
             name="static_transform_publisher",
             output="screen",
             arguments=[
                 "--frame-id",
-                "odom",
+                (
+                    *get_namespace(i),
+                    launch.substitutions.LaunchConfiguration("manager_robot_tf_frame"),
+                ),
                 "--child-frame-id",
-                (*get_namespace(i), "/odom"),
+                (
+                    *get_namespace(i),
+                    launch.substitutions.LaunchConfiguration("manager_robot_tf_frame"),
+                    launch.substitutions.LaunchConfiguration("manager_robot_tf_frame"),
+                ),
             ],
         )
 
@@ -151,7 +163,7 @@ def generate_launch_description():
         if teleop:
             result.append(_teleop)
         result.append(robot_description)
-        result.append(global_tf)
+        result.append(base_link_tf)
 
         return result
 
@@ -206,7 +218,7 @@ def generate_launch_description():
                     "--frame-id",
                     "world",
                     "--child-frame-id",
-                    "odom",
+                    "arena",
                 ],
             ),
         ]

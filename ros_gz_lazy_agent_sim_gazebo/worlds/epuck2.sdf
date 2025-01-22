@@ -111,7 +111,9 @@
         <right_joint>base_link_right_wheel</right_joint>
         <wheel_separation>0.052</wheel_separation>
         <wheel_radius>0.4</wheel_radius>
-        <odom_publish_frequency>10</odom_publish_frequency>
+        <frame_id>epuck2_robot_0</frame_id>
+        <child_frame_id>epuck2_robot_0/base_link</child_frame_id>
+        <odom_publish_frequency>60</odom_publish_frequency>
         <topic>model/epuck2_robot_0/cmd_vel</topic>
       </plugin>
 
@@ -127,14 +129,11 @@
         <publish_link_pose>true</publish_link_pose>
         <publish_sensor_pose>true</publish_sensor_pose>
         <publish_model_pose>true</publish_model_pose>
+        <publish_nested_model_pose>true</publish_nested_model_pose>
         <use_pose_vector_msg>true</use_pose_vector_msg>
+        <update_frequency>60</update_frequency>
         <static_publisher>true</static_publisher>
-        <static_update_frequency>1</static_update_frequency>
-      </plugin>
-      <plugin
-        filename="gz-sim-odometry-publisher-system"
-        name="gz::sim::systems::OdometryPublisher">
-        <robot_base_frame>epuck2_robot_0</robot_base_frame>
+        <static_update_frequency>60</static_update_frequency>
       </plugin>
 
       <!-- RF Comms -->
@@ -166,7 +165,9 @@
         <right_joint>base_link_right_wheel</right_joint>
         <wheel_separation>0.052</wheel_separation>
         <wheel_radius>0.4</wheel_radius>
-        <odom_publish_frequency>10</odom_publish_frequency>
+        <frame_id>epuck2_robot_1</frame_id>
+        <child_frame_id>epuck2_robot_1/base_link</child_frame_id>
+        <odom_publish_frequency>60</odom_publish_frequency>
         <topic>model/epuck2_robot_1/cmd_vel</topic>
       </plugin>
 
@@ -182,14 +183,11 @@
         <publish_link_pose>true</publish_link_pose>
         <publish_sensor_pose>true</publish_sensor_pose>
         <publish_model_pose>true</publish_model_pose>
+        <publish_nested_model_pose>true</publish_nested_model_pose>
         <use_pose_vector_msg>true</use_pose_vector_msg>
+        <update_frequency>60</update_frequency>
         <static_publisher>true</static_publisher>
-        <static_update_frequency>1</static_update_frequency>
-      </plugin>
-      <plugin
-        filename="gz-sim-odometry-publisher-system"
-        name="gz::sim::systems::OdometryPublisher">
-        <robot_base_frame>epuck2_robot_1</robot_base_frame>
+        <static_update_frequency>60</static_update_frequency>
       </plugin>
 
       <!-- RF Comms -->
