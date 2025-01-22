@@ -25,12 +25,12 @@ from agent_local_comms_server.robot_comms_model import (
 class GZKnowledgeServer(BaseKnowledgeServer):
     def __init__(self, robot_model: RobotCommsModel):
         super().__init__(robot_model)
-        self.node = Node()
+        self.node = None
         self.pub_knowledge = None
-        self.sub_knowledge = None
 
     @override
     def start(self):
+        self.node = Node()
         self.pub_knowledge = self.node.advertise("/broker/msgs", Dataframe)
 
         if not self.node.subscribe(
@@ -42,13 +42,16 @@ class GZKnowledgeServer(BaseKnowledgeServer):
 
     @override
     def stop(self):
-        del self.sub_knowledge
         del self.pub_knowledge
+        del self.node
 
     def handle(self, msg: Dataframe):
         address = msg.src_address
 
         request = EpuckKnowledgePacket.unpack(msg.data)
+
+        if request.robot_id < self.robot_model.robot_id:
+            return
 
         other_known_ids = set(request.known_ids)
         difference = other_known_ids.difference(self.robot_model.known_ids)
@@ -59,8 +62,8 @@ class GZKnowledgeServer(BaseKnowledgeServer):
                 f"Received new IDs from ({address}): {difference}"
             )
 
-        self.robot_model.logger.debug(
-            f"Received knowledge from {request.robot_id} ({address}): {other_known_ids}"
+        self.robot_model.logger.info(
+            f"Server: Received knowledge from {request.robot_id} ({address}): {other_known_ids}"
         )
 
         knowledge = EpuckKnowledgePacket(
@@ -77,7 +80,7 @@ class GZKnowledgeServer(BaseKnowledgeServer):
         self.pub_knowledge.publish(response)
 
         self.robot_model.logger.debug(
-            f"Sending knowledge to {request.robot_id} ({address}): {self.robot_model.known_ids}"
+            f"Server: Sending knowledge to {request.robot_id} ({address}): {self.robot_model.known_ids}"
         )
 
         return
@@ -91,24 +94,28 @@ class GZKnowledgeClient(BaseKnowledgeClient):
         robot_model: RobotCommsModel,
     ):
         super().__init__(neighbour, running, robot_model)
-        self.node = Node()
+        self.node = None
         self.pub_knowledge = None
         self.thread = threading.Thread(target=self.send_knowledge)
-        self.thread.daemon = True
+        self.stop_event = threading.Event()
 
     @override
     def start(self):
+        self.node = Node()
         self.pub_knowledge = self.node.advertise("/broker/msgs", Dataframe)
+        self.stop_event.clear()
         self.thread.start()
 
     @override
     def stop(self):
-        del self.pub_knowledge
+        self.stop_event.set()
         self.thread.join()
+        del self.pub_knowledge
+        del self.node
 
     def send_knowledge(self):
         self.robot_model.logger.info(
-            f"Starting knowledge connection with {self.neighbour.robot_id} ({self.neighbour.host})"
+            f"Client: Starting knowledge connection with {self.neighbour.robot_id} ({self.neighbour.host})"
         )
 
         response_queue = queue.SimpleQueue()
@@ -124,11 +131,15 @@ class GZKnowledgeClient(BaseKnowledgeClient):
                 f"Failed to subscribe to topic {self.robot_model.robot_host}/rx"
             )
 
-        while self.running():
+        while self.running() and not self.stop_event.is_set():
             knowledge = EpuckKnowledgePacket(
                 robot_id=self.robot_model.robot_id,
                 N=len(self.robot_model.known_ids),
                 known_ids=list(self.robot_model.known_ids),
+            )
+
+            self.robot_model.logger.info(
+                f"Client: Sending knowledge to {self.neighbour.robot_id} ({self.neighbour.host}): {self.robot_model.known_ids}"
             )
 
             request = Dataframe()
@@ -158,10 +169,14 @@ class GZKnowledgeClient(BaseKnowledgeClient):
                 )
 
             self.robot_model.logger.debug(
-                f"Received knowledge from {self.neighbour.robot_id} ({self.neighbour.host}): {other_known_ids}"
+                f"Client: Received knowledge from {self.neighbour.robot_id} ({self.neighbour.host}): {other_known_ids}"
             )
 
             time.sleep(1)
+
+        self.robot_model.logger.info(
+            f"Stopping knowledge connection with {self.neighbour.robot_id} ({self.neighbour.host})"
+        )
 
 
 def main():
