@@ -66,6 +66,8 @@ def generate_launch_description():
         # namespace="namespace",
         parameters=[
             {
+                "use_sim_time": True,
+                "expand_gz_topic_names": True,
                 "config_file": PathJoinSubstitution(
                     [sim_bringup, "config", "ros_gz_lazy_agent_sim_bridge.yaml"]
                 ),

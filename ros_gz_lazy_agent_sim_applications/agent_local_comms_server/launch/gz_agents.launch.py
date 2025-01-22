@@ -104,6 +104,7 @@ def generate_launch_description():
         )
 
         robot_description = launch_ros.actions.Node(
+            namespace=[*get_namespace(i)],
             package="robot_state_publisher",
             executable="robot_state_publisher",
             name=f"epuck_state_publisher_{i}",
@@ -156,6 +157,46 @@ def generate_launch_description():
             ],
         )
 
+        left_wheel_tf = launch_ros.actions.Node(
+            package="tf2_ros",
+            executable="static_transform_publisher",
+            name="static_transform_publisher",
+            output="screen",
+            arguments=[
+                "--frame-id",
+                (
+                    *get_namespace(i),
+                    "/left_wheel",
+                ),
+                "--child-frame-id",
+                (
+                    *get_namespace(i),
+                    launch.substitutions.LaunchConfiguration("manager_robot_tf_frame"),
+                    "/left_wheel",
+                ),
+            ],
+        )
+
+        right_wheel_tf = launch_ros.actions.Node(
+            package="tf2_ros",
+            executable="static_transform_publisher",
+            name="static_transform_publisher",
+            output="screen",
+            arguments=[
+                "--frame-id",
+                (
+                    *get_namespace(i),
+                    "/right_wheel",
+                ),
+                "--child-frame-id",
+                (
+                    *get_namespace(i),
+                    launch.substitutions.LaunchConfiguration("manager_robot_tf_frame"),
+                    "/right_wheel",
+                ),
+            ],
+        )
+
         result = []
 
         if node:
@@ -164,6 +205,8 @@ def generate_launch_description():
             result.append(_teleop)
         result.append(robot_description)
         result.append(base_link_tf)
+        result.append(left_wheel_tf)
+        result.append(right_wheel_tf)
 
         return result
 
@@ -209,18 +252,18 @@ def generate_launch_description():
                     "remap_ids/3": "3",
                 }.items(),
             ),
-            launch_ros.actions.Node(
-                package="tf2_ros",
-                executable="static_transform_publisher",
-                name="static_transform_publisher",
-                output="screen",
-                arguments=[
-                    "--frame-id",
-                    "world",
-                    "--child-frame-id",
-                    "arena",
-                ],
-            ),
+            # launch_ros.actions.Node(
+            #     package="tf2_ros",
+            #     executable="static_transform_publisher",
+            #     name="static_transform_publisher",
+            #     output="screen",
+            #     arguments=[
+            #         "--frame-id",
+            #         "world",
+            #         "--child-frame-id",
+            #         "arena",
+            #     ],
+            # ),
         ]
     )
     return ld

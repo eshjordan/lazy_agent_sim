@@ -8,7 +8,7 @@
     gz topic -e -t /model/epuck2/odometry
     ros2 topic echo /model/epuck2/odometry
 -->
-<sdf version="1.11">
+<sdf version="1.12">
   <world name="arena">
     <plugin
       filename="gz-sim-physics-system"
@@ -96,9 +96,28 @@
       </link>
     </model>
 
+
+    <frame name='epuck2_robot_0/odom'>
+      <pose>-0.1 -0.1 0.001 0 0 0</pose>
+    </frame>
+
+    <model name="epuck2_robot_0_fixed">
+      <pose relative_to='epuck2_robot_0/odom'>0 0 0 0 0 0</pose>
+      <static>true</static>
+      <plugin
+        filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>arena</odom_frame>
+        <robot_base_frame>epuck2_robot_0/odom</robot_base_frame>
+        <odom_publish_frequency>60</odom_publish_frequency>
+        <tf_topic>/model/epuck2_robot_0/tf</tf_topic>
+      </plugin>
+    </model>
+
     <model name="epuck2_robot_0">
       <self_collide>false</self_collide>
-      <pose>-0.1 -0.1 0.001 0 0 0</pose>
+      <pose relative_to='epuck2_robot_0/odom'>0 0 0 0 0 0</pose>
+
       <include merge="true">
         <uri>package://ros_gz_lazy_agent_sim_description/models/epuck2</uri>
       </include>
@@ -110,11 +129,10 @@
         <left_joint>base_link_left_wheel</left_joint>
         <right_joint>base_link_right_wheel</right_joint>
         <wheel_separation>0.052</wheel_separation>
-        <wheel_radius>0.4</wheel_radius>
-        <frame_id>epuck2_robot_0</frame_id>
-        <child_frame_id>epuck2_robot_0/base_link</child_frame_id>
+        <wheel_radius>0.02</wheel_radius>
+        <child_frame_id>epuck2_robot_0/odom/base_link</child_frame_id>
         <odom_publish_frequency>60</odom_publish_frequency>
-        <topic>model/epuck2_robot_0/cmd_vel</topic>
+        <topic>/model/epuck2_robot_0/cmd_vel</topic>
       </plugin>
 
       <!-- State-related plugins and topics -->
@@ -150,9 +168,28 @@
 
     </model>
 
+
+    <frame name='epuck2_robot_1/odom'>
+      <pose>0.1 -0.1 0.001 0 0 0</pose>
+    </frame>
+
+    <model name="epuck2_robot_1_fixed">
+      <pose relative_to='epuck2_robot_1/odom'>0 0 0 0 0 0</pose>
+      <static>true</static>
+      <plugin
+        filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>arena</odom_frame>
+        <robot_base_frame>epuck2_robot_1/odom</robot_base_frame>
+        <odom_publish_frequency>60</odom_publish_frequency>
+        <tf_topic>/model/epuck2_robot_1/tf</tf_topic>
+      </plugin>
+    </model>
+
     <model name="epuck2_robot_1">
       <self_collide>false</self_collide>
-      <pose>0.1 -0.1 0.001 0 0 0</pose>
+      <pose relative_to='epuck2_robot_1/odom'>0 0 0 0 0 0</pose>
+
       <include merge="true">
         <uri>package://ros_gz_lazy_agent_sim_description/models/epuck2</uri>
       </include>
@@ -164,11 +201,10 @@
         <left_joint>base_link_left_wheel</left_joint>
         <right_joint>base_link_right_wheel</right_joint>
         <wheel_separation>0.052</wheel_separation>
-        <wheel_radius>0.4</wheel_radius>
-        <frame_id>epuck2_robot_1</frame_id>
-        <child_frame_id>epuck2_robot_1/base_link</child_frame_id>
+        <wheel_radius>0.02</wheel_radius>
+        <child_frame_id>epuck2_robot_1/odom/base_link</child_frame_id>
         <odom_publish_frequency>60</odom_publish_frequency>
-        <topic>model/epuck2_robot_1/cmd_vel</topic>
+        <topic>/model/epuck2_robot_1/cmd_vel</topic>
       </plugin>
 
       <!-- State-related plugins and topics -->
