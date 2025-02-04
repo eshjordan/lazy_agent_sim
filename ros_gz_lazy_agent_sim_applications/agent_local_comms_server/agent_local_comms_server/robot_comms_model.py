@@ -2,15 +2,17 @@
 
 import select
 import socket
+import socketserver
 import threading
 import logging
 import time
-from typing import Callable
+from typing import Callable, override
 
 from agent_local_comms_server.packets import (
     EpuckHeartbeatPacket,
     EpuckHeartbeatResponsePacket,
     EpuckNeighbourPacket,
+    EpuckKnowledgePacket,
 )
 
 
@@ -50,7 +52,8 @@ class RobotCommsModel:
         manager_host: str,
         manager_port: int,
         robot_host: str,
-        robot_port: int,
+        robot_knowledge_exchange_port: int,
+        robot_knowledge_request_port: int,
         KnowledgeServerClass: type[BaseKnowledgeServer],
         KnowledgeClientClass: type[BaseKnowledgeClient],
         logger=logging.getLogger(__name__),
@@ -59,7 +62,8 @@ class RobotCommsModel:
         self.manager_host = manager_host
         self.manager_port = manager_port
         self.robot_host = robot_host
-        self.robot_port = robot_port
+        self.robot_knowledge_exchange_port = robot_knowledge_exchange_port
+        self.robot_knowledge_request_port = robot_knowledge_request_port
         self.KnowledgeServerClass = KnowledgeServerClass
         self.KnowledgeClientClass = KnowledgeClientClass
         self.logger = logger
@@ -69,22 +73,68 @@ class RobotCommsModel:
         self.heartbeat_thread = None
         self.heartbeat_client: socket.socket = None
 
+        self.knowledge_request_server = socketserver.ThreadingUDPServer(
+            (self.robot_host, self.robot_knowledge_request_port),
+            self.server_factory(),
+        )
+
         self.knowledge_server: BaseKnowledgeServer = None
         self.knowledge_clients: dict[int, BaseKnowledgeClient] = None
+
+        self.seq = 0
+
+    def server_factory(self):
+        robot_model = self
+
+        class ReceiveKnowledgeRequestHandler(socketserver.BaseRequestHandler):
+            @override
+            def handle(self):
+                self.request: tuple[bytes, socket.socket]
+                data, client = self.request
+
+                host = self.client_address[0]
+                port = self.client_address[1]
+
+                request = EpuckKnowledgePacket.unpack(data)
+
+                robot_model.logger.debug(
+                    f"Received knowledge request from {host}:{port}"
+                )
+
+                knowledge = EpuckKnowledgePacket(
+                    robot_id=robot_model.robot_id,
+                    seq=robot_model.get_seq(),
+                    N=len(robot_model.known_ids),
+                    known_ids=list(robot_model.known_ids),
+                )
+
+                client.sendto(knowledge.pack(), self.client_address)
+
+                robot_model.logger.debug(
+                    f"Sending requested knowledge to {host}:{port} - {robot_model.known_ids}"
+                )
 
     def __del__(self):
         self.stop()
         super().__del__()
+
+    def get_seq(self) -> int:
+        self.seq += 1
+        return self.seq
 
     def start(self):
         self.heartbeat_thread = threading.Thread(target=self.exchange_heartbeats)
         self.heartbeat_thread.daemon = True
         self.heartbeat_thread.start()
 
-    def exchange_heartbeats(self):
-        self.logger.info(
-            f"Starting robot comms model on {self.robot_host}:{self.robot_port}"
+        self.knowledge_request_thread = threading.Thread(
+            target=self.knowledge_request_server.serve_forever
         )
+        self.knowledge_request_thread.daemon = True
+        self.knowledge_request_thread.start()
+
+    def exchange_heartbeats(self):
+        self.logger.info(f"Starting heartbeat exchange client on {self.robot_host}")
 
         self.knowledge_server = self.KnowledgeServerClass(self)
         self.knowledge_server.start()
@@ -101,7 +151,7 @@ class RobotCommsModel:
                 EpuckHeartbeatPacket(
                     robot_id=self.robot_id,
                     robot_host=self.robot_host,
-                    robot_port=self.robot_port,
+                    robot_port=self.robot_knowledge_exchange_port,
                 ).pack(),
                 (self.manager_host, self.manager_port),
             )
@@ -161,6 +211,9 @@ class RobotCommsModel:
 
     def stop(self):
         self.heartbeat_client.shutdown(socket.SHUT_RDWR)
+        self.knowledge_request_server.shutdown()
+        self.knowledge_request_thread.join()
+
         for knowledge_client in self.knowledge_clients.items():
             knowledge_client.stop()
         self.knowledge_server.stop()

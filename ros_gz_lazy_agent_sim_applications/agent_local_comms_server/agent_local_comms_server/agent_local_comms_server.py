@@ -12,6 +12,7 @@ from agent_local_comms_server.packets import (
     EpuckHeartbeatPacket,
     EpuckHeartbeatResponsePacket,
     EpuckNeighbourPacket,
+    EpuckKnowledgePacket,
 )
 from socketserver import BaseRequestHandler, ThreadingUDPServer
 import threading
@@ -32,6 +33,11 @@ class LocalCommsManager(rclpy.node.Node):
         self.declare_parameter("remap_ids/1", 1)
         self.declare_parameter("remap_ids/2", 2)
         self.declare_parameter("remap_ids/3", 3)
+
+        self.knowledge_request_client = None
+        self.knowledge_request_timer = self.create_timer(
+            1.0, self.request_knowledge, autostart=False
+        )
 
         self.tf_buffer = tf2_ros.buffer.Buffer()
         self.tf_listener = tf2_ros.transform_listener.TransformListener(
@@ -71,29 +77,39 @@ class LocalCommsManager(rclpy.node.Node):
         self.server_thread.daemon = True
         self.server_thread.start()
 
+        self.knowledge_request_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.knowledge_request_timer.reset()
+
     def stop(self):
+        self.knowledge_request_timer.cancel()
+        self.knowledge_request_client = None
+
         if self.server is None:
             return
         self.server.shutdown()
         self.server.server_close()
         self.server = None
 
-    def frame_name(self, id: int) -> str:
-        remappings = self.get_parameters([f"remap_ids/{id}" for id in range(4)])
-        mapped_id_value = None
+    def robot_topic_name(self, id: int, remap: bool = True) -> str:
+        id_str = str(id)
 
-        for remap in remappings:
-            if remap.value == id:
-                mapped_id_value = remap.name.split("/")[-1]
-                break
+        if remap:
+            remappings = self.get_parameters([f"remap_ids/{id}" for id in range(4)])
 
-        if mapped_id_value is None:
-            mapped_id_value = str(id)
+            for remapping in remappings:
+                if remapping.value == id:
+                    id_str = remapping.name.split("/")[-1]
+                    break
 
         return (
             f"{self.get_parameter("robot_tf_prefix").value}"
-            + f"{mapped_id_value}"
+            + f"{id_str}"
             + f"{self.get_parameter("robot_tf_suffix").value}"
+        )
+
+    def robot_frame_name(self, id: int, remap: bool = True) -> str:
+        return (
+            self.robot_topic_name(id, remap)
             + f"{self.get_parameter("robot_tf_frame").value}"
         )
 
@@ -139,11 +155,11 @@ class LocalCommsManager(rclpy.node.Node):
                         )
                     )
 
-                frame = manager.frame_name(heartbeat.robot_id)
+                frame = manager.robot_frame_name(heartbeat.robot_id)
 
                 # Find neighbouring robots
                 known_frames = [
-                    (id, host, port, manager.frame_name(id))
+                    (id, host, port, manager.robot_frame_name(id))
                     for id, host, port in manager.known_robots
                     if id != heartbeat.robot_id
                 ]
@@ -219,6 +235,36 @@ class LocalCommsManager(rclpy.node.Node):
                 return
 
         return Handler
+
+    def request_knowledge(self):
+        for robot_id, robot_host, robot_port in self.known_robots:
+            self.get_logger().debug(f"Requesting knowledge from {robot_id}")
+
+            request = EpuckKnowledgePacket(
+                robot_id=robot_id,
+                seq=0,
+                N=0,
+                known_ids=[],
+            ).pack()
+
+            self.knowledge_request_client.sendto(
+                request,
+                (robot_host, robot_port),
+            )
+
+            data, retaddr = self.knowledge_request_client.recvfrom(
+                EpuckKnowledgePacket.calcsize()
+            )
+            if len(data) == 0:
+                self.robot_model.logger.warning(
+                    f"({self.neighbour.host}:{self.neighbour.port}) disconnected"
+                )
+                break
+
+            response = EpuckKnowledgePacket.unpack(data)
+            self.get_logger().info(
+                f"Received knowledge request response from {robot_id}: {response}"
+            )
 
 
 def main():

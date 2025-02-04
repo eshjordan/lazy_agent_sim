@@ -49,8 +49,8 @@ node "e-puck 1" {
 
   "epuck_cpp_driver" <--> epuck0AdvancedSercom: State & Controls
   "epuck_cpp_driver" <--> epuck1AdvancedSercom: State & Controls
-  "LocalCommsManager" <--> epuck0RobotCommsModel: Heartbeats\n\n\n
-  "LocalCommsManager" <--> epuck1RobotCommsModel: Heartbeats
+  "LocalCommsManager" <--> epuck0RobotCommsModel: Heartbeats & Knowledge\n\n\n
+  "LocalCommsManager" <--> epuck1RobotCommsModel: Heartbeats & Knowledge
   epuck0RobotCommsModel <--> epuck0UDPKnowledgeServer: Knowledge
   epuck0RobotCommsModel <--> epuck0UDPKnowledgeClient: Knowledge
   epuck1RobotCommsModel <--> epuck1UDPKnowledgeClient: Knowledge

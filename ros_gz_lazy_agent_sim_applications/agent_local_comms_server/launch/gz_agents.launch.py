@@ -19,13 +19,17 @@ def generate_launch_description():
                 "manager_robot_tf_suffix": "",
                 "manager_robot_tf_frame": "/base_link",
                 "robot0_host": "aa:bb:cc:dd:ee:00",
-                "robot0_port": "0",
+                "robot0_knowledge_exchange_port": "1",
+                "robot0_knowledge_request_port": "2",
                 "robot1_host": "aa:bb:cc:dd:ee:01",
-                "robot1_port": "0",
+                "robot1_knowledge_exchange_port": "1",
+                "robot1_knowledge_request_port": "2",
                 "robot2_host": "127.0.0.1",
-                "robot2_port": "50004",
+                "robot2_knowledge_exchange_port": "50005",
+                "robot2_knowledge_request_port": "50006",
                 "robot3_host": "127.0.0.1",
-                "robot3_port": "50005",
+                "robot3_knowledge_exchange_port": "50007",
+                "robot3_knowledge_request_port": "50008",
             }.items(),
         )
     )
@@ -61,8 +65,11 @@ def generate_launch_description():
                     "robot_host": launch.substitutions.LaunchConfiguration(
                         f"robot{i}_host"
                     ),
-                    "robot_port": launch.substitutions.LaunchConfiguration(
-                        f"robot{i}_port"
+                    "robot_knowledge_exchange_port": launch.substitutions.LaunchConfiguration(
+                        f"robot{i}_knowledge_exchange_port"
+                    ),
+                    "robot_knowledge_request_port": launch.substitutions.LaunchConfiguration(
+                        f"robot{i}_knowledge_request_port"
                     ),
                 }
             ],

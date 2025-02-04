@@ -19,31 +19,36 @@ abstract class BaseKnowledgeClient {
 }
 
 abstract class BaseRobotCommsModel {
-  + uint8_t ROBOT_ID
+  + uint16_t ROBOT_ID
   + std::string MANAGER_HOST
   + uint16_t MANAGER_PORT
   + std::string ROBOT_HOST
-  + uint16_t ROBOT_PORT
-  # std::set<uint8_t> known_ids
+  + uint16_t ROBOT_KNOWLEDGE_EXCHANGE_PORT
+  + uint16_t ROBOT_KNOWLEDGE_REQUEST_PORT
+  - std::map<uint16_t, EpuckKnowledgeRecord> known_ids
+  - uint16_t seq
 
   + BaseRobotCommsModel(...)
   + {abstract} void start()
   + {abstract} void stop()
-  + std::vector<uint8_t> get_known_ids()
-  + size_t insert_known_ids(std::vector<uint8_t> ids)
+  + uint16_t get_seq()
+  + EpuckKnowledgeRecord* known_ids_begin()
+  + EpuckKnowledgeRecord* known_ids_end()
+  + size_t known_ids_size()
+  + size_t insert_known_ids(EpuckKnowledgeRecord *begin, EpuckKnowledgeRecord *end)
 }
 
 
 struct EpuckHeartbeatPacket {
   +{static} uint8_t ID
-  +uint8_t robot_id
+  +uint16_t robot_id
   +std::array<char, MAX_HOST_LEN + 1> robot_host
   +uint16_t robot_port
 }
 
 struct EpuckNeighbourPacket {
   +{static} uint8_t ID
-  +uint8_t robot_id
+  +uint16_t robot_id
   +std::array<char, MAX_HOST_LEN + 1> host
   +uint16_t port
   +float distance
@@ -55,11 +60,17 @@ struct EpuckHeartbeatResponsePacket {
   +std::array<EpuckNeighbourPacket, MAX_ROBOTS> neighbours
 }
 
+struct EpuckKnowledgeRecord {
+  +uint16_t robot_id
+  +uint16_t seq
+}
+
 struct EpuckKnowledgePacket {
   +{static} uint8_t ID
-  +uint8_t robot_id
+  +uint16_t robot_id
+  +uint16_t seq
   +uint8_t N
-  +std::array<uint8_t, MAX_ROBOTS> known_ids
+  +std::array<EpuckKnowledgeRecord, MAX_ROBOTS> known_ids
 }
 
 
@@ -69,11 +80,15 @@ class RobotCommsModel <T : BaseKnowledgeServer\nU : BaseKnowledgeClient> {
   + void stop()
   - void launch_exchange_heartbeats()
   - void exchange_heartbeats()
+  - void launch_handle_knowledge_requests()
+  - void handle_knowledge_requests()
   - asio::io_context io_context_
   - std::shared_ptr<T> knowledge_server_
-  - std::map<uint8_t, U> knowledge_clients_
-  - bool run_heartbeats_
+  - std::map<uint16_t, U> knowledge_clients_
+  - bool running_
   - std::thread heartbeat_thread_
+  - std::thread knowledge_request_thread_
+  - asio::ip::udp::socket *knowledge_request_socket_
   - {static} char* TAG
 }
 
@@ -142,5 +157,6 @@ BaseRobotCommsModel -[hidden]left-> EpuckHeartbeatPacket
 RobotCommsModel -[hidden]left-> EpuckHeartbeatResponsePacket
 BaseRobotCommsModel -[hidden]right-> EpuckNeighbourPacket
 RobotCommsModel -[hidden]right-> EpuckKnowledgePacket
+RobotCommsModel -[hidden]right-> EpuckKnowledgeRecord
 
 @enduml

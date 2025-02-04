@@ -22,7 +22,8 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
         super().__init__(robot_model)
 
         self.server = socketserver.ThreadingUDPServer(
-            (robot_model.robot_host, robot_model.robot_port), self.server_factory()
+            (robot_model.robot_host, robot_model.robot_knowledge_exchange_port),
+            self.server_factory(),
         )
 
         self.thread = threading.Thread(target=self.server.serve_forever)
@@ -66,6 +67,7 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
 
                 knowledge = EpuckKnowledgePacket(
                     robot_id=robot_model.robot_id,
+                    seq=robot_model.get_seq(),
                     N=len(robot_model.known_ids),
                     known_ids=list(robot_model.known_ids),
                 )
@@ -111,6 +113,7 @@ class UDPKnowledgeClient(BaseKnowledgeClient):
         while self.running():
             knowledge = EpuckKnowledgePacket(
                 robot_id=self.robot_model.robot_id,
+                seq=self.robot_model.get_seq(),
                 N=len(self.robot_model.known_ids),
                 known_ids=list(self.robot_model.known_ids),
             )
@@ -171,8 +174,15 @@ def main():
         .get_parameter_value()
         .string_value
     )
-    robot_port = (
-        node.declare_parameter("robot_port", 50001).get_parameter_value().integer_value
+    robot_knowledge_exchange_port = (
+        node.declare_parameter("robot_knowledge_exchange_port", 50001)
+        .get_parameter_value()
+        .integer_value
+    )
+    robot_knowledge_request_port = (
+        node.declare_parameter("robot_knowledge_request_port", 50002)
+        .get_parameter_value()
+        .integer_value
     )
     logger = node.get_logger()
     robot_model = RobotCommsModel(
@@ -180,7 +190,8 @@ def main():
         manager_host,
         manager_port,
         robot_host,
-        robot_port,
+        robot_knowledge_exchange_port,
+        robot_knowledge_request_port,
         UDPKnowledgeServer,
         UDPKnowledgeClient,
         logger,

@@ -68,6 +68,7 @@ class GZKnowledgeServer(BaseKnowledgeServer):
 
         knowledge = EpuckKnowledgePacket(
             robot_id=self.robot_model.robot_id,
+            seq=self.robot_model.get_seq(),
             N=len(self.robot_model.known_ids),
             known_ids=list(self.robot_model.known_ids),
         )
@@ -134,6 +135,7 @@ class GZKnowledgeClient(BaseKnowledgeClient):
         while self.running() and not self.stop_event.is_set():
             knowledge = EpuckKnowledgePacket(
                 robot_id=self.robot_model.robot_id,
+                seq=self.robot_model.get_seq(),
                 N=len(self.robot_model.known_ids),
                 known_ids=list(self.robot_model.known_ids),
             )
@@ -198,8 +200,15 @@ def main():
         .get_parameter_value()
         .string_value
     )
-    robot_port = (
-        node.declare_parameter("robot_port", 0).get_parameter_value().integer_value
+    robot_knowledge_exchange_port = (
+        node.declare_parameter("robot_knowledge_exchange_port", 0)
+        .get_parameter_value()
+        .integer_value
+    )
+    robot_knowledge_request_port = (
+        node.declare_parameter("robot_knowledge_request_port", 0)
+        .get_parameter_value()
+        .integer_value
     )
     logger = node.get_logger()
     robot_model = RobotCommsModel(
@@ -207,7 +216,8 @@ def main():
         manager_host,
         manager_port,
         robot_host,
-        robot_port,
+        robot_knowledge_exchange_port,
+        robot_knowledge_request_port,
         GZKnowledgeServer,
         GZKnowledgeClient,
         logger,
