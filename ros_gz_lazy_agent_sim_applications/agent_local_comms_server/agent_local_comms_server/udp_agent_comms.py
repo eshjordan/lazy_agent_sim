@@ -22,7 +22,10 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
         super().__init__(robot_model)
 
         self.server = socketserver.ThreadingUDPServer(
-            (robot_model.robot_host, robot_model.robot_knowledge_exchange_port),
+            (
+                robot_model.robot_knowledge_host,
+                robot_model.robot_knowledge_exchange_port,
+            ),
             self.server_factory(),
         )
 
@@ -169,18 +172,23 @@ def main():
         .get_parameter_value()
         .integer_value
     )
-    robot_host = (
-        node.declare_parameter("robot_host", "127.0.0.1")
+    robot_comms_host = (
+        node.declare_parameter("robot_comms_host", "127.0.0.1")
+        .get_parameter_value()
+        .string_value
+    )
+    robot_comms_request_port = (
+        node.declare_parameter("robot_comms_request_port", 50001)
+        .get_parameter_value()
+        .integer_value
+    )
+    robot_knowledge_host = (
+        node.declare_parameter("robot_knowledge_host", "127.0.0.1")
         .get_parameter_value()
         .string_value
     )
     robot_knowledge_exchange_port = (
-        node.declare_parameter("robot_knowledge_exchange_port", 50001)
-        .get_parameter_value()
-        .integer_value
-    )
-    robot_knowledge_request_port = (
-        node.declare_parameter("robot_knowledge_request_port", 50002)
+        node.declare_parameter("robot_knowledge_exchange_port", 50002)
         .get_parameter_value()
         .integer_value
     )
@@ -189,9 +197,10 @@ def main():
         robot_id,
         manager_host,
         manager_port,
-        robot_host,
+        robot_comms_host,
+        robot_comms_request_port,
+        robot_knowledge_host,
         robot_knowledge_exchange_port,
-        robot_knowledge_request_port,
         UDPKnowledgeServer,
         UDPKnowledgeClient,
         logger,

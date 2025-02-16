@@ -18,18 +18,22 @@ def generate_launch_description():
                 "manager_robot_tf_prefix": "epuck2_robot_",
                 "manager_robot_tf_suffix": "",
                 "manager_robot_tf_frame": "/base_link",
-                "robot0_host": "127.0.0.1",
-                "robot0_knowledge_exchange_port": "50001",
-                "robot0_knowledge_request_port": "50002",
-                "robot1_host": "127.0.0.1",
-                "robot1_knowledge_exchange_port": "50003",
-                "robot1_knowledge_request_port": "50004",
-                "robot2_host": "127.0.0.1",
-                "robot2_knowledge_exchange_port": "50005",
-                "robot2_knowledge_request_port": "50006",
-                "robot3_host": "127.0.0.1",
-                "robot3_knowledge_exchange_port": "50007",
-                "robot3_knowledge_request_port": "50008",
+                "robot0_comms_host": "127.0.0.1",
+                "robot0_comms_request_port": "50001",
+                "robot0_knowledge_host": "127.0.0.1",
+                "robot0_knowledge_exchange_port": "50002",
+                "robot1_comms_host": "127.0.0.1",
+                "robot1_comms_request_port": "50003",
+                "robot1_knowledge_host": "127.0.0.1",
+                "robot1_knowledge_exchange_port": "50004",
+                "robot2_comms_host": "127.0.0.1",
+                "robot2_comms_request_port": "50005",
+                "robot2_knowledge_host": "127.0.0.1",
+                "robot2_knowledge_exchange_port": "50006",
+                "robot3_comms_host": "127.0.0.1",
+                "robot3_comms_request_port": "50007",
+                "robot2_knowledge_host": "127.0.0.1",
+                "robot3_knowledge_exchange_port": "50008",
             }.items(),
         )
     )
@@ -67,14 +71,17 @@ def generate_launch_description():
                     "manager_port": launch.substitutions.LaunchConfiguration(
                         "manager_server_port"
                     ),
-                    "robot_host": launch.substitutions.LaunchConfiguration(
-                        f"robot{i}_host"
+                    "robot_comms_host": launch.substitutions.LaunchConfiguration(
+                        f"robot{i}_comms_host"
+                    ),
+                    "robot_comms_request_port": launch.substitutions.LaunchConfiguration(
+                        f"robot{i}_comms_request_port"
+                    ),
+                    "robot_knowledge_host": launch.substitutions.LaunchConfiguration(
+                        f"robot{i}_knowledge_host"
                     ),
                     "robot_knowledge_exchange_port": launch.substitutions.LaunchConfiguration(
                         f"robot{i}_knowledge_exchange_port"
-                    ),
-                    "robot_knowledge_request_port": launch.substitutions.LaunchConfiguration(
-                        f"robot{i}_knowledge_request_port"
                     ),
                 }
             ],

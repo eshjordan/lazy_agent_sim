@@ -34,10 +34,10 @@ class GZKnowledgeServer(BaseKnowledgeServer):
         self.pub_knowledge = self.node.advertise("/broker/msgs", Dataframe)
 
         if not self.node.subscribe(
-            Dataframe, f"{self.robot_model.robot_host}/rx", self.handle
+            Dataframe, f"{self.robot_model.robot_knowledge_host}/rx", self.handle
         ):
             raise RuntimeError(
-                f"Failed to subscribe to topic {self.robot_model.robot_host}/rx"
+                f"Failed to subscribe to topic {self.robot_model.robot_knowledge_host}/rx"
             )
 
     @override
@@ -75,7 +75,7 @@ class GZKnowledgeServer(BaseKnowledgeServer):
 
         response = Dataframe()
         response.data = knowledge.pack()
-        response.src_address = self.robot_model.robot_host
+        response.src_address = self.robot_model.robot_knowledge_host
         response.dst_address = address
 
         self.pub_knowledge.publish(response)
@@ -126,10 +126,10 @@ class GZKnowledgeClient(BaseKnowledgeClient):
                 response_queue.put(msg)
 
         if not self.node.subscribe(
-            Dataframe, f"{self.robot_model.robot_host}/rx", handle
+            Dataframe, f"{self.robot_model.robot_knowledge_host}/rx", handle
         ):
             raise RuntimeError(
-                f"Failed to subscribe to topic {self.robot_model.robot_host}/rx"
+                f"Failed to subscribe to topic {self.robot_model.robot_knowledge_host}/rx"
             )
 
         while self.running() and not self.stop_event.is_set():
@@ -146,7 +146,7 @@ class GZKnowledgeClient(BaseKnowledgeClient):
 
             request = Dataframe()
             request.data = knowledge.pack()
-            request.src_address = self.robot_model.robot_host
+            request.src_address = self.robot_model.robot_knowledge_host
             request.dst_address = self.neighbour.host
 
             self.pub_knowledge.publish(request)
@@ -195,8 +195,18 @@ def main():
         .get_parameter_value()
         .integer_value
     )
-    robot_host = (
-        node.declare_parameter("robot_host", "aa:bb:cc:dd:ee:00")
+    robot_comms_host = (
+        node.declare_parameter("robot_comms_host", "127.0.0.1")
+        .get_parameter_value()
+        .string_value
+    )
+    robot_comms_request_port = (
+        node.declare_parameter("robot_comms_request_port", 50001)
+        .get_parameter_value()
+        .integer_value
+    )
+    robot_knowledge_host = (
+        node.declare_parameter("robot_knowledge_host", "aa:bb:cc:dd:ee:00")
         .get_parameter_value()
         .string_value
     )
@@ -205,19 +215,15 @@ def main():
         .get_parameter_value()
         .integer_value
     )
-    robot_knowledge_request_port = (
-        node.declare_parameter("robot_knowledge_request_port", 0)
-        .get_parameter_value()
-        .integer_value
-    )
     logger = node.get_logger()
     robot_model = RobotCommsModel(
         robot_id,
         manager_host,
         manager_port,
-        robot_host,
+        robot_comms_host,
+        robot_comms_request_port,
+        robot_knowledge_host,
         robot_knowledge_exchange_port,
-        robot_knowledge_request_port,
         GZKnowledgeServer,
         GZKnowledgeClient,
         logger,

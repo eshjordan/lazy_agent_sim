@@ -144,14 +144,18 @@ class LocalCommsManager(rclpy.node.Node):
 
                 if (
                     heartbeat.robot_id,
-                    heartbeat.robot_host,
-                    heartbeat.robot_port,
+                    heartbeat.robot_comms_host,
+                    heartbeat.robot_comms_request_port,
+                    heartbeat.robot_knowledge_host,
+                    heartbeat.robot_knowledge_exchange_port,
                 ) not in manager.known_robots:
                     manager.known_robots.add(
                         (
                             heartbeat.robot_id,
-                            heartbeat.robot_host,
-                            heartbeat.robot_port,
+                            heartbeat.robot_comms_host,
+                            heartbeat.robot_comms_request_port,
+                            heartbeat.robot_knowledge_host,
+                            heartbeat.robot_knowledge_exchange_port,
                         )
                     )
 
@@ -159,8 +163,13 @@ class LocalCommsManager(rclpy.node.Node):
 
                 # Find neighbouring robots
                 known_frames = [
-                    (id, host, port, manager.robot_frame_name(id))
-                    for id, host, port in manager.known_robots
+                    (
+                        id,
+                        knowledge_host,
+                        knowledge_exchange_port,
+                        manager.robot_frame_name(id),
+                    )
+                    for id, _, _, knowledge_host, knowledge_exchange_port in manager.known_robots
                     if id != heartbeat.robot_id
                 ]
 
@@ -237,7 +246,13 @@ class LocalCommsManager(rclpy.node.Node):
         return Handler
 
     def request_knowledge(self):
-        for robot_id, robot_host, robot_port in self.known_robots:
+        for (
+            robot_id,
+            robot_comms_host,
+            robot_comms_request_port,
+            _,
+            _,
+        ) in self.known_robots:
             self.get_logger().debug(f"Requesting knowledge from {robot_id}")
 
             request = EpuckKnowledgePacket(
@@ -249,7 +264,7 @@ class LocalCommsManager(rclpy.node.Node):
 
             self.knowledge_request_client.sendto(
                 request,
-                (robot_host, robot_port),
+                (robot_comms_host, robot_comms_request_port),
             )
 
             data, retaddr = self.knowledge_request_client.recvfrom(

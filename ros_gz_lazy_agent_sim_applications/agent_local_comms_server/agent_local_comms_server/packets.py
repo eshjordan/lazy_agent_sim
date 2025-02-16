@@ -9,7 +9,7 @@ MAX_HOST_LEN = 18
 ROBOT_ID_TYPE_FMT_STR: str = "H"  # ushort
 
 EPUCK_HEARTBEAT_PACKET_FMT_STR: str = (
-    ENDIAN_FMT + f"B{ROBOT_ID_TYPE_FMT_STR}{MAX_HOST_LEN+1}sH"
+    ENDIAN_FMT + f"B{ROBOT_ID_TYPE_FMT_STR}{MAX_HOST_LEN+1}sH{MAX_HOST_LEN+1}sH"
 )
 EPUCK_HEARTBEAT_PACKET_ID: int = 0x20
 
@@ -18,16 +18,20 @@ EPUCK_HEARTBEAT_PACKET_ID: int = 0x20
 class EpuckHeartbeatPacket:
     id: int = 0x20  # byte
     robot_id: int = 0x0  # see above
-    robot_host: str = ""  # str
-    robot_port: int = 0  # ushort
+    robot_comms_host: str = ""  # str
+    robot_comms_request_port: int = 0  # ushort
+    robot_knowledge_host: str = ""  # str
+    robot_knowledge_exchange_port: int = 0  # ushort
 
     def pack(self):
         return struct.pack(
             EPUCK_HEARTBEAT_PACKET_FMT_STR,
             self.id,
             self.robot_id,
-            self.robot_host.encode("ascii"),
-            self.robot_port,
+            self.robot_comms_host.encode("ascii"),
+            self.robot_comms_request_port,
+            self.robot_knowledge_host.encode("ascii"),
+            self.robot_knowledge_exchange_port,
         )
 
     @classmethod
@@ -38,7 +42,8 @@ class EpuckHeartbeatPacket:
             )
         args = struct.unpack(EPUCK_HEARTBEAT_PACKET_FMT_STR, buffer)
         obj = cls(*args)
-        obj.robot_host = obj.robot_host.decode("ascii").rstrip("\x00")  # type: ignore
+        obj.robot_comms_host = obj.robot_comms_host.decode("ascii").rstrip("\x00")  # type: ignore
+        obj.robot_knowledge_host = obj.robot_knowledge_host.decode("ascii").rstrip("\x00")  # type: ignore
         return obj
 
     @classmethod

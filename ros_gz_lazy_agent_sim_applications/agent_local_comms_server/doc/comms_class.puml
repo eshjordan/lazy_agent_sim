@@ -42,8 +42,10 @@ abstract class BaseRobotCommsModel {
 struct EpuckHeartbeatPacket {
   +{static} uint8_t ID
   +uint16_t robot_id
-  +std::array<char, MAX_HOST_LEN + 1> robot_host
-  +uint16_t robot_port
+  +std::array<char, MAX_HOST_LEN + 1> robot_comms_host
+  +uint16_t robot_comms_request_port
+  +std::array<char, MAX_HOST_LEN + 1> robot_knowledge_host
+  +uint16_t robot_knowledge_exchange_port
 }
 
 struct EpuckNeighbourPacket {
