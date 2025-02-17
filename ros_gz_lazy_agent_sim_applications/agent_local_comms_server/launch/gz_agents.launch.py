@@ -46,17 +46,25 @@ def generate_launch_description():
         )
 
     def launch_robot_comms(
-        i: int, robot_id: int, node: bool = True, teleop: bool = True
+        i: int,
+        robot_id: int,
+        node: bool = True,
+        teleop: bool = True,
+        debug: bool = False,
     ) -> list[launch.Action]:
         _node = launch_ros.actions.Node(
             package="agent_local_comms_server",
             executable="gz_agent_comms",
             name=f"knowledge_comms_robot{i}",
             output="screen",
-            # prefix=[
-            #     # Debugging with gdb
-            #     "xterm -bg black -fg white -fa 'Monospace' -fs 13 -e gdb -ex start --args"
-            # ],
+            prefix=(
+                None
+                if not debug
+                else [
+                    # Debugging with pdb
+                    "xterm -bg black -fg white -fa 'Monospace' -fs 13 -e python3 -m pdb"
+                ]
+            ),
             parameters=[
                 {
                     "robot_id": robot_id,

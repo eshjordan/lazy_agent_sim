@@ -56,8 +56,8 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
                 request = EpuckKnowledgePacket.unpack(data)
 
                 other_known_ids = set(request.known_ids)
-                difference = other_known_ids.difference(robot_model.known_ids)
-                robot_model.known_ids.update(other_known_ids)
+                difference = other_known_ids.difference(robot_model.GetKnownIds())
+                robot_model.InsertKnownIds(other_known_ids)
 
                 if len(difference) > 0:
                     robot_model.logger.info(
@@ -68,17 +68,12 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
                     f"Received knowledge from {request.robot_id} ({host}:{port}): {other_known_ids}"
                 )
 
-                knowledge = EpuckKnowledgePacket(
-                    robot_id=robot_model.robot_id,
-                    seq=robot_model.get_seq(),
-                    N=len(robot_model.known_ids),
-                    known_ids=list(robot_model.known_ids),
-                )
+                knowledge = robot_model.CreateKnowledgePacket()
 
                 client.sendto(knowledge.pack(), self.client_address)
 
                 robot_model.logger.debug(
-                    f"Sending knowledge to {request.robot_id} ({host}:{port}): {robot_model.known_ids}"
+                    f"Sending knowledge to {request.robot_id} ({host}:{port}): {robot_model.GetKnownIds()}"
                 )
 
                 return
@@ -114,19 +109,14 @@ class UDPKnowledgeClient(BaseKnowledgeClient):
             f"Starting knowledge connection with {self.neighbour.robot_id} ({self.neighbour.host}:{self.neighbour.port})"
         )
         while self.running():
-            knowledge = EpuckKnowledgePacket(
-                robot_id=self.robot_model.robot_id,
-                seq=self.robot_model.get_seq(),
-                N=len(self.robot_model.known_ids),
-                known_ids=list(self.robot_model.known_ids),
-            )
+            knowledge = self.robot_model.CreateKnowledgePacket()
 
             self.client.sendto(
                 knowledge.pack(), (self.neighbour.host, self.neighbour.port)
             )
 
             self.robot_model.logger.debug(
-                f"Sending knowledge to {self.neighbour.robot_id} ({self.neighbour.host}:{self.neighbour.port}): {self.robot_model.known_ids}"
+                f"Sending knowledge to {self.neighbour.robot_id} ({self.neighbour.host}:{self.neighbour.port}): {self.robot_model.GetKnownIds()}"
             )
 
             data, retaddr = self.client.recvfrom(EpuckKnowledgePacket.calcsize())
@@ -139,8 +129,8 @@ class UDPKnowledgeClient(BaseKnowledgeClient):
             response = EpuckKnowledgePacket.unpack(data)
 
             other_known_ids = set(response.known_ids)
-            difference = other_known_ids.difference(self.robot_model.known_ids)
-            self.robot_model.known_ids.update(other_known_ids)
+            difference = other_known_ids.difference(self.robot_model.GetKnownIds())
+            self.robot_model.InsertKnownIds(other_known_ids)
 
             if len(difference) > 0:
                 self.robot_model.logger.info(

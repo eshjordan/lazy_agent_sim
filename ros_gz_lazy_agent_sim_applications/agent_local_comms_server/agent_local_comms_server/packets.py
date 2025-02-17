@@ -160,6 +160,20 @@ class EpuckKnowledgeRecord:
     def calcsize(cls):
         return struct.calcsize(EPUCK_KNOWLEDGE_RECORD_FMT_STR)
 
+    def __lt__(self, other):
+        return self.robot_id < other.robot_id or (
+            self.robot_id == other.robot_id and self.seq < other.seq
+        )
+
+    def __eq__(self, other):
+        return self.robot_id == other.robot_id and self.seq == other.seq
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash((self.robot_id, self.seq))
+
 
 EPUCK_KNOWLEDGE_PACKET_FMT_STR: str = ENDIAN_FMT + f"B{ROBOT_ID_TYPE_FMT_STR}HB"
 EPUCK_KNOWLEDGE_PACKET_ID: int = 0x22

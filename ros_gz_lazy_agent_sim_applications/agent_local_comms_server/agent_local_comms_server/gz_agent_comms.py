@@ -30,6 +30,9 @@ class GZKnowledgeServer(BaseKnowledgeServer):
 
     @override
     def start(self):
+        self.robot_model.logger.info(
+            f"Starting knowledge server on {self.robot_model.robot_knowledge_host}"
+        )
         self.node = Node()
         self.pub_knowledge = self.node.advertise("/broker/msgs", Dataframe)
 
@@ -50,28 +53,27 @@ class GZKnowledgeServer(BaseKnowledgeServer):
 
         request = EpuckKnowledgePacket.unpack(msg.data)
 
+        self.robot_model.logger.debug(
+            f"Server: Received knowledge from {request.robot_id} ({address}): {request}"
+        )
+
         if request.robot_id < self.robot_model.robot_id:
+            self.robot_model.logger.debug(
+                f"Server: ({self.robot_model.robot_id}) Ignoring knowledge from {request.robot_id} ({address})"
+            )
             return
 
-        other_known_ids = set(request.known_ids)
-        difference = other_known_ids.difference(self.robot_model.known_ids)
-        self.robot_model.known_ids.update(other_known_ids)
+        known_ids_before = self.robot_model.GetKnownIds()
+        num_inserted = self.robot_model.InsertKnownIds(request.known_ids)
 
-        if len(difference) > 0:
+        if num_inserted > 0:
+            other_known_ids = set(request.known_ids)
+            difference = other_known_ids.difference(known_ids_before)
             self.robot_model.logger.info(
                 f"Received new IDs from ({address}): {difference}"
             )
 
-        self.robot_model.logger.info(
-            f"Server: Received knowledge from {request.robot_id} ({address}): {other_known_ids}"
-        )
-
-        knowledge = EpuckKnowledgePacket(
-            robot_id=self.robot_model.robot_id,
-            seq=self.robot_model.get_seq(),
-            N=len(self.robot_model.known_ids),
-            known_ids=list(self.robot_model.known_ids),
-        )
+        knowledge = self.robot_model.CreateKnowledgePacket()
 
         response = Dataframe()
         response.data = knowledge.pack()
@@ -81,7 +83,7 @@ class GZKnowledgeServer(BaseKnowledgeServer):
         self.pub_knowledge.publish(response)
 
         self.robot_model.logger.debug(
-            f"Server: Sending knowledge to {request.robot_id} ({address}): {self.robot_model.known_ids}"
+            f"Server: Sending knowledge to {request.robot_id} ({address}): {self.robot_model.GetKnownIds()}"
         )
 
         return
@@ -133,15 +135,10 @@ class GZKnowledgeClient(BaseKnowledgeClient):
             )
 
         while self.running() and not self.stop_event.is_set():
-            knowledge = EpuckKnowledgePacket(
-                robot_id=self.robot_model.robot_id,
-                seq=self.robot_model.get_seq(),
-                N=len(self.robot_model.known_ids),
-                known_ids=list(self.robot_model.known_ids),
-            )
+            knowledge = self.robot_model.CreateKnowledgePacket()
 
-            self.robot_model.logger.info(
-                f"Client: Sending knowledge to {self.neighbour.robot_id} ({self.neighbour.host}): {self.robot_model.known_ids}"
+            self.robot_model.logger.debug(
+                f"Client: Sending knowledge to {self.neighbour.robot_id} ({self.neighbour.host}): {self.robot_model.GetKnownIds()}"
             )
 
             request = Dataframe()
@@ -161,18 +158,19 @@ class GZKnowledgeClient(BaseKnowledgeClient):
 
             response = EpuckKnowledgePacket.unpack(response.data)
 
-            other_known_ids = set(response.known_ids)
-            difference = other_known_ids.difference(self.robot_model.known_ids)
-            self.robot_model.known_ids.update(other_known_ids)
+            self.robot_model.logger.debug(
+                f"Client: Received knowledge from {self.neighbour.robot_id} ({self.neighbour.host}): {response.known_ids}"
+            )
 
-            if len(difference) > 0:
+            known_ids_before = self.robot_model.GetKnownIds()
+            num_inserted = self.robot_model.InsertKnownIds(response.known_ids)
+
+            if num_inserted > 0:
+                other_known_ids = set(response.known_ids)
+                difference = other_known_ids.difference(known_ids_before)
                 self.robot_model.logger.info(
                     f"Received new IDs from ({self.neighbour.host}): {difference}"
                 )
-
-            self.robot_model.logger.debug(
-                f"Client: Received knowledge from {self.neighbour.robot_id} ({self.neighbour.host}): {other_known_ids}"
-            )
 
             time.sleep(1)
 

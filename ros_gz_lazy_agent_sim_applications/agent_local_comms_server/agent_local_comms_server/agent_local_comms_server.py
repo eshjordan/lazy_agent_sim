@@ -277,7 +277,7 @@ class LocalCommsManager(rclpy.node.Node):
                 break
 
             response = EpuckKnowledgePacket.unpack(data)
-            self.get_logger().info(
+            self.get_logger().debug(
                 f"Received knowledge request response from {robot_id}: {response}"
             )
 

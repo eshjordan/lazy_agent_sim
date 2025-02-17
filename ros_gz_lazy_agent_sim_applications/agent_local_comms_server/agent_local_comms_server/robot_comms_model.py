@@ -6,7 +6,7 @@ import socketserver
 import threading
 import logging
 import time
-from typing import Callable, override
+from typing import Callable, Iterable, override
 
 from agent_local_comms_server.packets import (
     EpuckHeartbeatPacket,
@@ -90,6 +90,17 @@ class BaseRobotCommsModel:
     def stop(self):
         pass
 
+    def InsertKnownIds(self, new_ids: Iterable[EpuckKnowledgeRecord]) -> int:
+        size_before = self.KnownIdsSize()
+        for record in new_ids:
+            if (
+                record.robot_id not in self.known_ids_
+                or self.known_ids_[record.robot_id].seq < record.seq
+            ):
+                self.known_ids_[record.robot_id] = record
+
+        return self.KnownIdsSize() - size_before
+
     def GetKnownIds(self) -> list[EpuckKnowledgeRecord]:
         return list(self.known_ids_.values())
 
@@ -101,9 +112,14 @@ class BaseRobotCommsModel:
         return self.seq_
 
     def CreateKnowledgePacket(self):
+        # Update the sequence number of the internal record for this robot, so it matches the one in the response
+        seq = self.GetSeq()
+        new_record = [EpuckKnowledgeRecord(self.robot_id, seq)]
+        self.InsertKnownIds(new_record)
+
         return EpuckKnowledgePacket(
             robot_id=self.robot_id,
-            seq=self.GetSeq(),
+            seq=seq,
             N=self.KnownIdsSize(),
             known_ids=self.GetKnownIds(),
         )
@@ -236,7 +252,6 @@ class RobotCommsModel(BaseRobotCommsModel):
                 self.logger.debug(
                     f"Received neighbour: {neighbour.robot_id} ({neighbour.host}:{neighbour.port}) at distance {neighbour.dist}"
                 )
-                self.known_ids.add(neighbour.robot_id)
 
             # Start threads for new neighbours
             new_in_range_neighbours = [
