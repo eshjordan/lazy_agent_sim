@@ -2,7 +2,7 @@
 
 !theme sunlust
 
-!$enable_digital_twin = 0
+!$enable_digital_twin = 1
 
 node "Mocap Camera"
 
@@ -63,8 +63,8 @@ node "e-puck 1" {
   "High-level Controller" <- "LocalCommsManager": Knowledge
   "epuck_cpp_driver" <-> "e-puck 0": State & Controls
   "epuck_cpp_driver" <-down-> "e-puck 1": State & Controls
-  "LocalCommsManager" <-up-> "e-puck 0": Heartbeats
-  "LocalCommsManager" <-> "e-puck 1": Heartbeats
+  "LocalCommsManager" <-up-> "e-puck 0": Heartbeats & Knowledge
+  "LocalCommsManager" <-> "e-puck 1": Heartbeats & Knowledge
   "e-puck 0" <--> "e-puck 1": Knowledge
 !endif
 
@@ -90,8 +90,8 @@ node "e-puck 1" {
 
   "High-level Controller" --> Gazebo: State & Controls
 
-  gzLocalCommsManager <--> simEpuck0RobotCommsModel: Heartbeats
-  gzLocalCommsManager <--> simEpuck1RobotCommsModel: Heartbeats
+  gzLocalCommsManager <--> simEpuck0RobotCommsModel: Heartbeats & Knowledge
+  gzLocalCommsManager <--> simEpuck1RobotCommsModel: Heartbeats & Knowledge
   simEpuck0RobotCommsModel <--> simEpuck0GZKnowledgeServer: Knowledge
   simEpuck0RobotCommsModel <--> simEpuck0GZKnowledgeClient: Knowledge
   simEpuck1RobotCommsModel <--> simEpuck1GZKnowledgeClient: Knowledge

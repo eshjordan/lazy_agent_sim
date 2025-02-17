@@ -22,9 +22,10 @@ abstract class BaseRobotCommsModel {
   + uint16_t ROBOT_ID
   + std::string MANAGER_HOST
   + uint16_t MANAGER_PORT
-  + std::string ROBOT_HOST
+  + std::string ROBOT_COMMS_HOST
+  + uint16_t ROBOT_COMMS_REQUEST_PORT
+  + std::string ROBOT_KNOWLEDGE_HOST
   + uint16_t ROBOT_KNOWLEDGE_EXCHANGE_PORT
-  + uint16_t ROBOT_KNOWLEDGE_REQUEST_PORT
   - std::map<uint16_t, EpuckKnowledgeRecord> known_ids
   - uint16_t seq
 
@@ -36,6 +37,7 @@ abstract class BaseRobotCommsModel {
   + EpuckKnowledgeRecord* known_ids_end()
   + size_t known_ids_size()
   + size_t insert_known_ids(EpuckKnowledgeRecord *begin, EpuckKnowledgeRecord *end)
+  + EpuckKnowledgePacket create_knowledge_packet()
 }
 
 
