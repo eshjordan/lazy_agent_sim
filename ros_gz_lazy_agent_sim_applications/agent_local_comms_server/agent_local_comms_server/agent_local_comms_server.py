@@ -18,6 +18,10 @@ from socketserver import BaseRequestHandler, ThreadingUDPServer
 import threading
 import tf2_ros.buffer
 import tf2_ros.transform_listener
+from lazy_agent_sim_interfaces.msg import (
+    EpuckKnowledgePacket as EpuckKnowledgePacketMsg,
+    EpuckKnowledgeRecord as EpuckKnowledgeRecordMsg,
+)
 
 
 class LocalCommsManager(rclpy.node.Node):
@@ -37,6 +41,9 @@ class LocalCommsManager(rclpy.node.Node):
         self.knowledge_request_client = None
         self.knowledge_request_timer = self.create_timer(
             1.0, self.request_knowledge, autostart=False
+        )
+        self.knowledge_request_publisher = self.create_publisher(
+            EpuckKnowledgePacketMsg, "~/knowledge", 10
         )
 
         self.tf_buffer = tf2_ros.buffer.Buffer()
@@ -280,6 +287,20 @@ class LocalCommsManager(rclpy.node.Node):
             self.get_logger().debug(
                 f"Received knowledge request response from {robot_id}: {response}"
             )
+
+            msg_response = EpuckKnowledgePacketMsg(
+                robot_id=response.robot_id,
+                seq=response.seq,
+                N=response.N,
+                known_ids=[
+                    EpuckKnowledgeRecordMsg(
+                        robot_id=known_id.robot_id, seq=known_id.seq
+                    )
+                    for known_id in response.known_ids
+                ],
+            )
+
+            self.knowledge_request_publisher.publish(msg_response)
 
 
 def main():

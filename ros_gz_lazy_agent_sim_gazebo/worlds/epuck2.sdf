@@ -241,6 +241,150 @@
     </model>
 
 
+    <frame name='epuck2_robot_2/odom'>
+      <pose>-0.1 0.1 0.001 0 0 0</pose>
+    </frame>
+
+    <model name="epuck2_robot_2_fixed">
+      <pose relative_to='epuck2_robot_2/odom'>0 0 0 0 0 0</pose>
+      <static>true</static>
+      <plugin
+        filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>arena</odom_frame>
+        <robot_base_frame>epuck2_robot_2/odom</robot_base_frame>
+        <odom_publish_frequency>60</odom_publish_frequency>
+        <tf_topic>/model/epuck2_robot_2/tf</tf_topic>
+      </plugin>
+    </model>
+
+    <model name="epuck2_robot_2">
+      <self_collide>false</self_collide>
+      <pose relative_to='epuck2_robot_2/odom'>0 0 0 0 0 0</pose>
+
+      <include merge="true">
+        <uri>package://ros_gz_lazy_agent_sim_description/models/epuck2</uri>
+      </include>
+
+      <!-- Differential drive controller plugin -->
+      <plugin
+        filename="gz-sim-diff-drive-system"
+        name="gz::sim::systems::DiffDrive">
+        <left_joint>base_link_left_wheel</left_joint>
+        <right_joint>base_link_right_wheel</right_joint>
+        <wheel_separation>0.052</wheel_separation>
+        <wheel_radius>0.02</wheel_radius>
+        <child_frame_id>epuck2_robot_2/odom/base_link</child_frame_id>
+        <odom_publish_frequency>60</odom_publish_frequency>
+        <topic>/model/epuck2_robot_2/cmd_vel</topic>
+      </plugin>
+
+      <!-- State-related plugins and topics -->
+      <plugin
+        filename="gz-sim-joint-state-publisher-system"
+        name="gz::sim::systems::JointStatePublisher">
+      </plugin>
+
+      <plugin
+        filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>true</publish_link_pose>
+        <publish_sensor_pose>true</publish_sensor_pose>
+        <publish_model_pose>true</publish_model_pose>
+        <publish_nested_model_pose>true</publish_nested_model_pose>
+        <use_pose_vector_msg>true</use_pose_vector_msg>
+        <update_frequency>60</update_frequency>
+        <static_publisher>true</static_publisher>
+        <static_update_frequency>60</static_update_frequency>
+      </plugin>
+
+      <!-- RF Comms -->
+      <plugin
+        filename="gz-sim-comms-endpoint-system"
+        name="gz::sim::systems::CommsEndpoint">
+        <address>aa:bb:cc:dd:ee:02</address>
+        <topic>aa:bb:cc:dd:ee:02/rx</topic>
+        <broker>
+          <bind_service>/broker/bind</bind_service>
+          <unbind_service>/broker/unbind</unbind_service>
+        </broker>
+      </plugin>
+
+    </model>
+
+
+    <frame name='epuck2_robot_3/odom'>
+      <pose>0.1 0.1 0.001 0 0 0</pose>
+    </frame>
+
+    <model name="epuck2_robot_3_fixed">
+      <pose relative_to='epuck2_robot_3/odom'>0 0 0 0 0 0</pose>
+      <static>true</static>
+      <plugin
+        filename="gz-sim-odometry-publisher-system"
+        name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>arena</odom_frame>
+        <robot_base_frame>epuck2_robot_3/odom</robot_base_frame>
+        <odom_publish_frequency>60</odom_publish_frequency>
+        <tf_topic>/model/epuck2_robot_3/tf</tf_topic>
+      </plugin>
+    </model>
+
+    <model name="epuck2_robot_3">
+      <self_collide>false</self_collide>
+      <pose relative_to='epuck2_robot_3/odom'>0 0 0 0 0 0</pose>
+
+      <include merge="true">
+        <uri>package://ros_gz_lazy_agent_sim_description/models/epuck2</uri>
+      </include>
+
+      <!-- Differential drive controller plugin -->
+      <plugin
+        filename="gz-sim-diff-drive-system"
+        name="gz::sim::systems::DiffDrive">
+        <left_joint>base_link_left_wheel</left_joint>
+        <right_joint>base_link_right_wheel</right_joint>
+        <wheel_separation>0.052</wheel_separation>
+        <wheel_radius>0.02</wheel_radius>
+        <child_frame_id>epuck2_robot_3/odom/base_link</child_frame_id>
+        <odom_publish_frequency>60</odom_publish_frequency>
+        <topic>/model/epuck2_robot_3/cmd_vel</topic>
+      </plugin>
+
+      <!-- State-related plugins and topics -->
+      <plugin
+        filename="gz-sim-joint-state-publisher-system"
+        name="gz::sim::systems::JointStatePublisher">
+      </plugin>
+
+      <plugin
+        filename="gz-sim-pose-publisher-system"
+        name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>true</publish_link_pose>
+        <publish_sensor_pose>true</publish_sensor_pose>
+        <publish_model_pose>true</publish_model_pose>
+        <publish_nested_model_pose>true</publish_nested_model_pose>
+        <use_pose_vector_msg>true</use_pose_vector_msg>
+        <update_frequency>60</update_frequency>
+        <static_publisher>true</static_publisher>
+        <static_update_frequency>60</static_update_frequency>
+      </plugin>
+
+      <!-- RF Comms -->
+      <plugin
+        filename="gz-sim-comms-endpoint-system"
+        name="gz::sim::systems::CommsEndpoint">
+        <address>aa:bb:cc:dd:ee:03</address>
+        <topic>aa:bb:cc:dd:ee:03/rx</topic>
+        <broker>
+          <bind_service>/broker/bind</bind_service>
+          <unbind_service>/broker/unbind</unbind_service>
+        </broker>
+      </plugin>
+
+    </model>
+
+
     <gui fullscreen="0">
 
       <!-- Main scene window -->
