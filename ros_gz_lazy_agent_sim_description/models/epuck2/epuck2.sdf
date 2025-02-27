@@ -1,5 +1,5 @@
 <sdf
-  version='1.12'
+  version='1.11'
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="http://sdformat.org/schemas/root.xsd"
 >

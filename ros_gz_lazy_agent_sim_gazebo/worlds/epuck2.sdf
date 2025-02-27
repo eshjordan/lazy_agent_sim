@@ -8,7 +8,7 @@
     gz topic -e -t /model/epuck2/odometry
     ros2 topic echo /model/epuck2/odometry
 -->
-<sdf version="1.12">
+<sdf version="1.11">
   <world name="arena">
     <plugin
       filename="gz-sim-physics-system"
