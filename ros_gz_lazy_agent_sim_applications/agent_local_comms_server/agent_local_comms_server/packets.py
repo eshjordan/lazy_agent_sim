@@ -5,6 +5,9 @@ ENDIAN_FMT = "<"
 
 MAX_ROBOTS = 10
 MAX_HOST_LEN = 18
+MAX_BOUNDARY_X_POINTS = 2
+MAX_BOUNDARY_Y_POINTS = 0
+MAX_BOUNDARY_Z_POINTS = 0
 
 ROBOT_ID_TYPE_FMT_STR: str = "H"  # ushort
 
@@ -130,29 +133,108 @@ class EpuckNeighbourPacket:
         return struct.calcsize(EPUCK_NEIGHBOUR_PACKET_FMT_STR)
 
 
-EPUCK_KNOWLEDGE_RECORD_FMT_STR: str = ENDIAN_FMT + f"{ROBOT_ID_TYPE_FMT_STR}H"
+CENTROID_FMT_STR: str = ENDIAN_FMT + "fff"
+
+
+@dataclass
+class Centroid:
+    x: float = 0.0
+    y: float = 0.0
+    z: float = 0.0
+
+    def pack(self):
+        return struct.pack(CENTROID_FMT_STR, self.x, self.y, self.z)
+
+    @classmethod
+    def unpack(cls, buffer: bytes):
+        return cls(*struct.unpack(CENTROID_FMT_STR, buffer))
+
+    @classmethod
+    def calcsize(cls):
+        return struct.calcsize(CENTROID_FMT_STR)
+
+
+BOUNDARY_FMT_STR: str = (
+    ENDIAN_FMT
+    + f"f{MAX_BOUNDARY_X_POINTS}f{MAX_BOUNDARY_Y_POINTS}f{MAX_BOUNDARY_Z_POINTS}f"
+)
+
+
+@dataclass
+class Boundary:
+    x_points: list[float]
+    y_points: list[float]
+    z_points: list[float]
+
+    def pack(self):
+        return struct.pack(
+            BOUNDARY_FMT_STR,
+            *self.x_points[:MAX_BOUNDARY_X_POINTS],
+            *self.y_points[:MAX_BOUNDARY_Y_POINTS],
+            *self.z_points[:MAX_BOUNDARY_Z_POINTS],
+        )
+
+    @classmethod
+    def unpack(cls, buffer: bytes):
+        return cls(*struct.unpack(BOUNDARY_FMT_STR, buffer))
+
+    @classmethod
+    def calcsize(cls):
+        return struct.calcsize(BOUNDARY_FMT_STR)
+
+
+SEQ_FMT_STR: str = "H"  # ushort
+EPUCK_KNOWLEDGE_RECORD_FMT_STR: str = (
+    ENDIAN_FMT
+    + f"{ROBOT_ID_TYPE_FMT_STR}{CENTROID_FMT_STR}{BOUNDARY_FMT_STR}{SEQ_FMT_STR}"
+)
 
 
 @dataclass
 class EpuckKnowledgeRecord:
     robot_id: int = 0  # see above
+    centroid: Centroid  # Centroid
+    boundary: Boundary  # Boundary
     seq: int = 0x0  # ushort
 
     def pack(self):
-        return struct.pack(
-            EPUCK_KNOWLEDGE_RECORD_FMT_STR,
-            self.robot_id,
-            self.seq,
+        return (
+            struct.pack(
+                ROBOT_ID_TYPE_FMT_STR,
+                self.robot_id,
+            )
+            + self.centroid.pack()
+            + self.boundary.pack()
+            + struct.pack(
+                SEQ_FMT_STR,
+                self.seq,
+            )
         )
 
     @classmethod
     def unpack(cls, buffer: bytes):
-        start_len = struct.calcsize(EPUCK_KNOWLEDGE_RECORD_FMT_STR)
-        robot_id, seq = struct.unpack(
-            EPUCK_KNOWLEDGE_RECORD_FMT_STR, buffer[:start_len]
+        start_len = 0
+        next_len = struct.calcsize(ROBOT_ID_TYPE_FMT_STR)
+        robot_id = struct.unpack(
+            ROBOT_ID_TYPE_FMT_STR, buffer[start_len : start_len + next_len]
         )
+
+        start_len += next_len
+        next_len = Centroid.calcsize()
+        centroid = Centroid.unpack(buffer[start_len : start_len + next_len])
+
+        start_len += next_len
+        next_len = Boundary.calcsize()
+        boundary = Boundary.unpack(buffer[start_len : start_len + next_len])
+
+        start_len += next_len
+        next_len = struct.calcsize(SEQ_FMT_STR)
+        seq = struct.unpack(SEQ_FMT_STR, buffer[start_len : start_len + next_len])
+
         return cls(
             robot_id=robot_id,
+            centroid=centroid,
+            boundary=boundary,
             seq=seq,
         )
 

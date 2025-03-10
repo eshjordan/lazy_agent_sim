@@ -294,7 +294,10 @@ class LocalCommsManager(rclpy.node.Node):
                 N=response.N,
                 known_ids=[
                     EpuckKnowledgeRecordMsg(
-                        robot_id=known_id.robot_id, seq=known_id.seq
+                        robot_id=known_id.robot_id,
+                        centroid=known_id.centroid,
+                        boundary=known_id.boundary,
+                        seq=known_id.seq,
                     )
                     for known_id in response.known_ids
                 ],

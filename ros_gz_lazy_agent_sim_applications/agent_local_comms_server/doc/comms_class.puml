@@ -27,6 +27,8 @@ abstract class BaseRobotCommsModel {
   + std::string ROBOT_KNOWLEDGE_HOST
   + uint16_t ROBOT_KNOWLEDGE_EXCHANGE_PORT
   - std::map<uint16_t, EpuckKnowledgeRecord> known_ids
+  - Centroid centroid
+  - Boundary boundary
   - uint16_t seq
 
   + BaseRobotCommsModel(...)
@@ -38,6 +40,10 @@ abstract class BaseRobotCommsModel {
   + size_t known_ids_size()
   + size_t insert_known_ids(EpuckKnowledgeRecord *begin, EpuckKnowledgeRecord *end)
   + EpuckKnowledgePacket create_knowledge_packet()
+  + void set_centroid(const Centroid &centroid)
+  + void set_boundary(const Boundary &boundary)
+  + const Centroid &get_centroid()
+  + const Boundary &get_boundary()
 }
 
 
@@ -64,8 +70,22 @@ struct EpuckHeartbeatResponsePacket {
   +std::array<EpuckNeighbourPacket, MAX_ROBOTS> neighbours
 }
 
+struct Centroid {
+  +float x
+  +float y
+  +float z
+}
+
+struct Boundary {
+  +std::array<float, MAX_BOUNDARY_X_POINTS> x_points
+  +std::array<float, MAX_BOUNDARY_Y_POINTS> y_points
+  +std::array<float, MAX_BOUNDARY_Z_POINTS> z_points
+}
+
 struct EpuckKnowledgeRecord {
   +uint16_t robot_id
+  +Centroid centroid
+  +Boundary boundary
   +uint16_t seq
 }
 

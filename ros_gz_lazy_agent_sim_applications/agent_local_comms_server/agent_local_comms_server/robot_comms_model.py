@@ -14,6 +14,8 @@ from agent_local_comms_server.packets import (
     EpuckNeighbourPacket,
     EpuckKnowledgePacket,
     EpuckKnowledgeRecord,
+    Centroid,
+    Boundary,
 )
 
 
@@ -77,8 +79,17 @@ class BaseRobotCommsModel:
         self.robot_knowledge_exchange_port = robot_knowledge_exchange_port
 
         self.seq_ = 0
+        self.centroid_ = Centroid()
+        self.boundary_ = Boundary([], [], [])
         self.known_ids_ = dict(
-            [(robot_id, EpuckKnowledgeRecord(robot_id, self.GetSeq()))]
+            [
+                (
+                    robot_id,
+                    EpuckKnowledgeRecord(
+                        self.robot_id, self.centroid_, self.boundary_, self.GetSeq()
+                    ),
+                )
+            ]
         )
 
     def __del__(self):
@@ -114,7 +125,9 @@ class BaseRobotCommsModel:
     def CreateKnowledgePacket(self):
         # Update the sequence number of the internal record for this robot, so it matches the one in the response
         seq = self.GetSeq()
-        new_record = [EpuckKnowledgeRecord(self.robot_id, seq)]
+        new_record = [
+            EpuckKnowledgeRecord(self.robot_id, self.centroid_, self.boundary_, seq)
+        ]
         self.InsertKnownIds(new_record)
 
         return EpuckKnowledgePacket(
@@ -122,6 +135,24 @@ class BaseRobotCommsModel:
             seq=seq,
             N=self.KnownIdsSize(),
             known_ids=self.GetKnownIds(),
+        )
+
+    def SetCentroid(self, centroid: Centroid):
+        self.centroid_ = Centroid(centroid)
+
+    def SetBoundary(self, boundary: Boundary):
+        self.boundary_ = Boundary(
+            boundary.x_points.copy(), boundary.y_points.copy(), boundary.z_points.copy()
+        )
+
+    def GetCentroid(self) -> Centroid:
+        return Centroid(self.centroid_)
+
+    def GetBoundary(self) -> Boundary:
+        return Boundary(
+            self.boundary_.x_points.copy(),
+            self.boundary_.y_points.copy(),
+            self.boundary_.z_points.copy(),
         )
 
 
