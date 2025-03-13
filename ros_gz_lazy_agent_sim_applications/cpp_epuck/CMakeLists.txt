@@ -19,6 +19,21 @@ if(BUILD_TESTING)
   ament_auto_add_gmock(${PROJECT_NAME}_unit_test
     test/test_BaseRobotCommsModel.cpp
   )
+
+  include(ProcessorCount)
+  ProcessorCount(nproc)
+  math(EXPR nproc "${nproc}-1")
+  set(TEST_JOBS --jobs ${nproc})
+  ament_clang_format(CONFIG_FILE ${CMAKE_CURRENT_LIST_DIR}/../../.clang-format)
+  ament_clang_tidy(CONFIG_FILE ${CMAKE_CURRENT_LIST_DIR}/../../.clang-tidy TIMEOUT 3600 ${TEST_JOBS} ${CMAKE_CURRENT_BINARY_DIR})
+  ament_cppcheck(
+    LIBRARIES boost gnu googletest opencv2 posix
+    EXCLUDE include/Csv.hpp test/test_Csv.cpp # Problems with analysing all possible templates
+  )
 endif()
 
-ament_auto_package()
+ament_auto_package(
+  INSTALL_TO_SHARE
+    launch
+)
+

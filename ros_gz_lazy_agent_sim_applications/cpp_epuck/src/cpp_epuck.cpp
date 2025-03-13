@@ -1,22 +1,27 @@
-#include <cpp_epuck/UDPComms.hpp>
+#include "cpp_epuck/types.hpp"
 #include <rclcpp/rclcpp.hpp>
 
-int main(int argc, char **argv)
+#define ROS2
+
+#include <cpp_epuck/UDPComms.hpp>
+
+int main(int argc, char **argv) // NOLINT(bugprone-exception-escape)
 {
     rclcpp::init(argc, argv);
+    auto node                          = std::make_shared<rclcpp::Node>("robot_comms_model");
+    auto robot_id                      = node->declare_parameter("robot_id", 0);
+    auto manager_host                  = node->declare_parameter("manager_host", "127.0.0.1");
+    auto manager_port                  = node->declare_parameter("manager_port", 50000);
+    auto robot_comms_host              = node->declare_parameter("robot_comms_host", "127.0.0.1");
+    auto robot_comms_request_port      = node->declare_parameter("robot_comms_request_port", 50001);
+    auto robot_knowledge_host          = node->declare_parameter("robot_knowledge_host", "127.0.0.1");
+    auto robot_knowledge_exchange_port = node->declare_parameter("robot_knowledge_exchange_port", 50002);
 
-    robot_id_type robot_id                 = 0;
-    HostSizeString manager_host            = "localhost";
-    uint16_t manager_port                  = 12345;
-    HostSizeString robot_comms_host        = "localhost";
-    uint16_t robot_comms_request_port      = 12346;
-    HostSizeString robot_knowledge_host    = "localhost";
-    uint16_t robot_knowledge_exchange_port = 12347;
+    auto robot_model = std::make_shared<RobotCommsModel<UDPKnowledgeServer, UDPKnowledgeClient>>(
+        robot_id, host_size_string(manager_host), manager_port, host_size_string(robot_comms_host),
+        robot_comms_request_port, host_size_string(robot_knowledge_host), robot_knowledge_exchange_port);
 
-    auto robot_model = RobotCommsModel<UDPKnowledgeServer, UDPKnowledgeClient>(
-        robot_id, manager_host, manager_port, robot_comms_host, robot_comms_request_port, robot_knowledge_host,
-        robot_knowledge_exchange_port);
-
-    rclcpp::spin(std::make_shared<rclcpp::Node>("cpp_epuck"));
-    return 0;
+    robot_model->start();
+    rclcpp::spin(node);
+    robot_model->stop();
 }
