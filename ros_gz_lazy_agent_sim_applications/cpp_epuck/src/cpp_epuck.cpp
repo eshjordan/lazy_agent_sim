@@ -16,10 +16,12 @@ int main(int argc, char **argv) // NOLINT(bugprone-exception-escape)
     auto robot_comms_request_port      = node->declare_parameter("robot_comms_request_port", 50001);
     auto robot_knowledge_host          = node->declare_parameter("robot_knowledge_host", "127.0.0.1");
     auto robot_knowledge_exchange_port = node->declare_parameter("robot_knowledge_exchange_port", 50002);
+    auto network_factory               = std::make_shared<NetworkFactory>();
 
     auto robot_model = std::make_shared<RobotCommsModel<UDPKnowledgeServer, UDPKnowledgeClient>>(
         robot_id, host_size_string(manager_host), manager_port, host_size_string(robot_comms_host),
-        robot_comms_request_port, host_size_string(robot_knowledge_host), robot_knowledge_exchange_port);
+        robot_comms_request_port, host_size_string(robot_knowledge_host), robot_knowledge_exchange_port,
+        network_factory);
 
     robot_model->start();
     rclcpp::spin(node);

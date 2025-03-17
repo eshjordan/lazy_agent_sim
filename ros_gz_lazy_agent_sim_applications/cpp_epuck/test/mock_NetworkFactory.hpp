@@ -1,134 +1,102 @@
 #include <cpp_epuck/NetworkFactory.hpp>
 #include <gmock/gmock.h>
+#include <utility>
 
 // Mock implementations for testing
 class MockIoContext : public IIoContext
 {
 public:
     MOCK_METHOD(void, run, (), (override));
+
     MOCK_METHOD(void, stop, (), (override));
-    MOCK_METHOD(boost::asio::io_context &, getNativeContext, (), (override));
+
+    MOCK_METHOD(asio::io_context &, get_native_context, (), (override));
 
     // This is needed for tests that must interact with the real io_context
-    boost::asio::io_context realContext;
+    asio::io_context real_context;
 
-    boost::asio::io_context &getNativeContextImpl() { return realContext; }
+    asio::io_context &get_native_context_impl() { return real_context; }
+};
+
+class MockTcpEndpoint : public ITCPEndpoint
+{
+public:
+    MOCK_METHOD(asio::ip::tcp::endpoint &, get_native_endpoint, (), (override));
+
+    MOCK_METHOD(asio::ip::address, address, (), (override));
+
+    MOCK_METHOD(uint16_t, port, (), (override));
 };
 
 class MockTcpSocket : public ITcpSocket
 {
 public:
-    MOCK_METHOD(void, connect, (const boost::asio::ip::tcp::endpoint &endpoint), (override));
-    MOCK_METHOD(void, asyncConnect,
-                (const boost::asio::ip::tcp::endpoint &endpoint,
-                 std::function<void(const boost::system::error_code &)>),
-                (override));
-    MOCK_METHOD(size_t, send, (const boost::asio::const_buffer &buffer), (override));
-    MOCK_METHOD(void, asyncSend,
-                (const boost::asio::const_buffer &buffer,
-                 std::function<void(const boost::system::error_code &, std::size_t)>),
-                (override));
-    MOCK_METHOD(size_t, receive, (const boost::asio::mutable_buffer &buffer), (override));
-    MOCK_METHOD(void, asyncReceive,
-                (const boost::asio::mutable_buffer &buffer,
-                 std::function<void(const boost::system::error_code &, std::size_t)>),
-                (override));
+    MOCK_METHOD(void, connect, (const asio::ip::tcp::endpoint &endpoint), (override));
+
+    MOCK_METHOD(size_t, send, (const asio::const_buffer &buffer), (override));
+
+    MOCK_METHOD(size_t, receive, (const asio::mutable_buffer &buffer), (override));
+
     MOCK_METHOD(void, close, (), (override));
-    MOCK_METHOD(boost::asio::ip::tcp::socket &, getNativeSocket, (), (override));
 
-    // Helper methods for tests
-    void simulateReceive(const std::vector<char> &data, const boost::system::error_code &ec = {})
-    {
-        if (receiveHandler)
-        {
-            std::memcpy(receiveBuffer.data(), data.data(), std::min(data.size(), receiveBuffer.size()));
-            receiveHandler(ec, std::min(data.size(), receiveBuffer.size()));
-        }
-    }
+    MOCK_METHOD(bool, is_open, (), (override));
 
-    void captureReceiveBuffer(const boost::asio::mutable_buffer &buffer,
-                              std::function<void(const boost::system::error_code &, std::size_t)> handler)
-    {
-        receiveBuffer  = boost::asio::buffer(buffer);
-        receiveHandler = handler;
-    }
+    MOCK_METHOD(asio::ip::tcp::socket &, get_native_socket, (), (override));
 
 private:
-    boost::asio::mutable_buffer receiveBuffer;
-    std::function<void(const boost::system::error_code &, std::size_t)> receiveHandler;
+    asio::mutable_buffer _receive_buffer;
+};
+
+class MockUdpEndpoint : public IUDPEndpoint
+{
+public:
+    MOCK_METHOD(asio::ip::udp::endpoint &, get_native_endpoint, (), (override));
+
+    MOCK_METHOD(asio::ip::address, address, (), (override));
+
+    MOCK_METHOD(uint16_t, port, (), (override));
 };
 
 class MockUdpSocket : public IUdpSocket
 {
 public:
     MOCK_METHOD(void, open, (), (override));
-    MOCK_METHOD(void, bind, (const boost::asio::ip::udp::endpoint &endpoint), (override));
-    MOCK_METHOD(size_t, sendTo,
-                (const boost::asio::const_buffer &buffer, const boost::asio::ip::udp::endpoint &destination),
-                (override));
-    MOCK_METHOD(void, asyncSendTo,
-                (const boost::asio::const_buffer &buffer, const boost::asio::ip::udp::endpoint &destination,
-                 std::function<void(const boost::system::error_code &, std::size_t)>),
-                (override));
-    MOCK_METHOD(size_t, receiveFrom,
-                (const boost::asio::mutable_buffer &buffer, boost::asio::ip::udp::endpoint &sender), (override));
-    MOCK_METHOD(void, asyncReceiveFrom,
-                (const boost::asio::mutable_buffer &buffer, boost::asio::ip::udp::endpoint &sender,
-                 std::function<void(const boost::system::error_code &, std::size_t)>),
-                (override));
+
+    MOCK_METHOD(void, bind, (IUDPEndpoint & endpoint), (override));
+
+    MOCK_METHOD(size_t, send_to, (const asio::const_buffer &buffer, IUDPEndpoint &destination), (override));
+
+    MOCK_METHOD(size_t, receive_from, (const asio::mutable_buffer &buffer, IUDPEndpoint &sender), (override));
+
     MOCK_METHOD(void, close, (), (override));
-    MOCK_METHOD(boost::asio::ip::udp::socket &, getNativeSocket, (), (override));
 
-    // Helper methods for tests
-    void simulateReceive(const std::vector<char> &data, const boost::system::error_code &ec = {})
-    {
-        if (receiveHandler)
-        {
-            std::memcpy(receiveBuffer.data(), data.data(), std::min(data.size(), receiveBuffer.size()));
-            receiveHandler(ec, std::min(data.size(), receiveBuffer.size()));
-        }
-    }
+    MOCK_METHOD(bool, is_open, (), (override));
 
-    void captureReceiveBuffer(const boost::asio::mutable_buffer &buffer,
-                              std::function<void(const boost::system::error_code &, std::size_t)> handler)
-    {
-        receiveBuffer  = boost::asio::buffer(buffer);
-        receiveHandler = handler;
-    }
+    MOCK_METHOD(asio::ip::udp::socket &, get_native_socket, (), (override));
 
 private:
-    boost::asio::mutable_buffer receiveBuffer;
-    std::function<void(const boost::system::error_code &, std::size_t)> receiveHandler;
+    asio::mutable_buffer _receive_buffer;
 };
 
 class MockResolver : public IResolver
 {
 public:
-    MOCK_METHOD(boost::asio::ip::tcp::resolver::results_type, resolveTcp,
+    MOCK_METHOD(asio::ip::tcp::resolver::results_type, resolve_tcp,
                 (const std::string &host, const std::string &service), (override));
-    MOCK_METHOD(
-        void, asyncResolveTcp,
-        (const std::string &host, const std::string &service,
-         std::function<void(const boost::system::error_code &, const boost::asio::ip::tcp::resolver::results_type &)>
-             handler),
-        (override));
-    MOCK_METHOD(boost::asio::ip::udp::resolver::results_type, resolveUdp,
+
+    MOCK_METHOD(asio::ip::udp::resolver::results_type, resolve_udp,
                 (const std::string &host, const std::string &service), (override));
-    MOCK_METHOD(
-        void, asyncResolveUdp,
-        (const std::string &host, const std::string &service,
-         std::function<void(const boost::system::error_code &, const boost::asio::ip::udp::resolver::results_type &)>
-             handler),
-        (override));
 };
 
 class MockTimer : public ITimer
 {
 public:
-    MOCK_METHOD(void, expires_after, (const boost::asio::steady_timer::duration &expiry_time), (override));
-    MOCK_METHOD(void, expires_at, (const boost::asio::steady_timer::time_point &expiry_time), (override));
+    MOCK_METHOD(void, expires_after, (const asio::steady_timer::duration &expiry_time), (override));
+
+    MOCK_METHOD(void, expires_at, (const asio::steady_timer::time_point &expiry_time), (override));
+
     MOCK_METHOD(void, wait, (), (override));
-    MOCK_METHOD(void, asyncWait, (std::function<void(const boost::system::error_code &)> handler), (override));
+
     MOCK_METHOD(void, cancel, (), (override));
 };
 
@@ -137,30 +105,44 @@ class MockNetworkFactory : public INetworkFactory
 {
 public:
     // These methods will return mock objects that can be configured in tests
-    std::unique_ptr<IIoContext> createIoContext() override
+    std::shared_ptr<IIoContext> create_io_context() override
     {
-        auto mock = std::make_unique<MockIoContext>();
+        auto mock = std::make_shared<MockIoContext>();
         // Set up default behavior
-        ON_CALL(*mock, getNativeContext())
-            .WillByDefault(testing::Invoke(mock.get(), &MockIoContext::getNativeContextImpl));
+        ON_CALL(*mock, get_native_context())
+            .WillByDefault(testing::Invoke(mock.get(), &MockIoContext::get_native_context_impl));
         return mock;
     }
 
-    std::unique_ptr<ITcpSocket> createTcpSocket(IIoContext &ioContext) override
+    std::shared_ptr<ITCPEndpoint> create_tcp_endpoint() override { return std::make_shared<MockTcpEndpoint>(); }
+
+    std::shared_ptr<ITCPEndpoint> create_tcp_endpoint(asio::ip::address_v4 /*addr*/, uint16_t /*port*/) override
     {
-        return std::make_unique<MockTcpSocket>();
+        return std::make_shared<MockTcpEndpoint>();
     }
 
-    std::unique_ptr<IUdpSocket> createUdpSocket(IIoContext &ioContext) override
+    std::shared_ptr<ITcpSocket> create_tcp_socket(IIoContext & /*io_context*/) override
+    {
+        return std::make_shared<MockTcpSocket>();
+    }
+
+    std::shared_ptr<IUDPEndpoint> create_udp_endpoint() override { return std::make_shared<MockUdpEndpoint>(); }
+
+    std::shared_ptr<IUDPEndpoint> create_udp_endpoint(asio::ip::address_v4 /*addr*/, uint16_t /*port*/) override
+    {
+        return std::make_shared<MockUdpEndpoint>();
+    }
+
+    std::shared_ptr<IUdpSocket> create_udp_socket(IIoContext & /*io_context*/) override
     {
         // Similar implementation for UDP socket mocks
-        return std::make_unique<MockUdpSocket>();
+        return std::make_shared<MockUdpSocket>();
     }
 
-    std::unique_ptr<IResolver> createResolver(IIoContext &ioContext) override
+    std::shared_ptr<IResolver> create_resolver(IIoContext & /*io_context*/) override
     {
-        return std::make_unique<MockResolver>();
+        return std::make_shared<MockResolver>();
     }
 
-    std::unique_ptr<ITimer> createTimer(IIoContext &ioContext) override { return std::make_unique<MockTimer>(); }
+    std::shared_ptr<ITimer> create_timer(IIoContext & /*io_context*/) override { return std::make_shared<MockTimer>(); }
 };

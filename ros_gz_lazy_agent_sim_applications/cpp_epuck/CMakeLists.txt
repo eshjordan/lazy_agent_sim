@@ -18,6 +18,7 @@ if(BUILD_TESTING)
   # Create the test executable
   ament_auto_add_gmock(${PROJECT_NAME}_unit_test
     test/test_BaseRobotCommsModel.cpp
+    test/test_RobotCommsModel.cpp
   )
 
   if (LINTER_TESTS)
