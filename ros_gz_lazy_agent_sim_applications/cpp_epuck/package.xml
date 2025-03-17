@@ -12,6 +12,7 @@
 
   <!-- General Dependancies (Build & Exec) -->
   <depend>rclcpp</depend>
+  <depend>asio</depend>
 
   <!-- Testing Dependencies -->
   <test_depend>ament_cmake_gtest</test_depend>
