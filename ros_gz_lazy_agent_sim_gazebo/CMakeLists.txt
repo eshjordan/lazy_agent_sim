@@ -1,97 +1,66 @@
-cmake_minimum_required(VERSION 3.5)
-
-# Following directive defines the project name.
+cmake_minimum_required(VERSION 3.22.0)
 project(ros_gz_lazy_agent_sim_gazebo)
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-# Following directives find required packages and load their configuration.
-# The 'set' directive defines a variable (e.g. 'GZ_PLUGIN_VER').
-# Such variables can be used lateron in the CMakeLists.txt file.
-find_package(ament_cmake REQUIRED)
-find_package(ros_gz_lazy_agent_sim_description REQUIRED)
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 
-find_package(gz-cmake3 REQUIRED)
-find_package(gz-plugin2 REQUIRED COMPONENTS register)
-set(GZ_PLUGIN_VER ${gz-plugin2_VERSION_MAJOR})
-find_package(gz-common5 REQUIRED COMPONENTS profiler)
-set(GZ_COMMON_VER ${gz-common5_VERSION_MAJOR})
+list(APPEND KNOWN_GZ_VERSIONS
+  "garden"
+  "harmonic"
+  "ionic"
+)
+
+# Set default Gazebo version, or use the one set in the environment variable
+if ("$ENV{GZ_VERSION}" IN_LIST KNOWN_GZ_VERSIONS)
+  set(GZ_VERSION "$ENV{GZ_VERSION}")
+else()
+  set(GZ_VERSION "ionic")
+endif()
+
+add_library(gz-sim INTERFACE)
 
 # Garden
-if("$ENV{GZ_VERSION}" STREQUAL "garden")
-  find_package(gz-sim7 REQUIRED)
-  set(GZ_SIM_VER ${gz-sim7_VERSION_MAJOR})
+if("${GZ_VERSION}" STREQUAL "garden")
   message(STATUS "Compiling against Gazebo Garden")
-# Default to Harmonic
-else()
-  find_package(gz-sim8 REQUIRED)
-  set(GZ_SIM_VER ${gz-sim8_VERSION_MAJOR})
+  find_package(gz-sim7 REQUIRED)
+  target_link_libraries(gz-sim INTERFACE gz-sim7::gz-sim7)
+# Harmonic
+elseif("${GZ_VERSION}" STREQUAL "harmonic")
   message(STATUS "Compiling against Gazebo Harmonic")
+  find_package(gz-sim8 REQUIRED)
+  target_link_libraries(gz-sim INTERFACE gz-sim8::gz-sim8)
+# Ionic
+elseif("${GZ_VERSION}" STREQUAL "ionic")
+  message(STATUS "Compiling against Gazebo Ionic")
+  find_package(gz-sim9 REQUIRED)
+  target_link_libraries(gz-sim INTERFACE gz-sim9::gz-sim9)
 endif()
 
 
-# Following 'add_library' directive defines a library target named 'BasicSystem'.
-# The 'SHARED' keyword indicates that a shared library should be compiled, and
-# is followed by the list of source files for the target.
-add_library(BasicSystem
-  SHARED
+ament_auto_add_library(BasicSystem SHARED
   src/BasicSystem.cc
 )
 
-# Following 'target_include_directories' directive specifies 'include' as the
-# include directory to use when compiling the 'BasicSystem' target.
-# The 'PRIVATE' keyword specifies that this directive will populate the
-# INCLUDE_DIRECTORIES property for the 'BasicSystem' target.
-target_include_directories(
-  BasicSystem PRIVATE include
+target_link_libraries(BasicSystem
+  gz-sim
 )
 
-# Following 'target_link_libraries' directive specifies to use the
-# gz-sim library when linking the 'BasicSystem' target.
-# The 'PRIVATE' keyword stipulates that the gz-sim library will not
-# automatically be included if the 'BasicSystem' target were to
-# be linked to anoter target.
-# ${GZ_SIM_VER} is substituted by the value that is was set to above.
-target_link_libraries(BasicSystem PRIVATE
-  gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER})
 
-
-# Following directives similarly specify another target: 'FullSystem'.
-add_library(FullSystem
-  SHARED
+ament_auto_add_library(FullSystem SHARED
   src/FullSystem.cc
 )
 
-target_include_directories(
-  FullSystem PRIVATE include
+target_link_libraries(FullSystem
+  gz-sim
 )
-
-target_link_libraries(FullSystem PRIVATE
-  gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER})
-
-
-
-# Following 'install' directive ensures that the compiled libraries
-# of the 'BasicSystem' and 'FullSystem' targets will be copied
-# to the subfolder 'lib/ros_gz_lazy_agent_sim_gazebo' of the install directory.
-install(
-  TARGETS BasicSystem FullSystem
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-
-# Following 'install' directive ensures that the 'worlds' subfolder
-# will be copied to the 'share/ros_gz_lazy_agent_sim_gazebo/worlds'
-# subfolder of the installation directory.
-install(
-  DIRECTORY worlds/
-  DESTINATION share/${PROJECT_NAME}/worlds
-)
-
 
 # Following directives are used when testing.
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
+  ament_auto_find_test_dependencies()
 endif()
 
 
@@ -105,4 +74,7 @@ ament_environment_hooks("${CMAKE_CURRENT_SOURCE_DIR}/hooks/${PROJECT_NAME}.sh.in
 
 # Following directive configures ament based on the previous directives, and should
 # typically be the last directive in the CMakeLists.txt file.
-ament_package()
+ament_auto_package(
+  INSTALL_TO_SHARE
+    worlds
+)
