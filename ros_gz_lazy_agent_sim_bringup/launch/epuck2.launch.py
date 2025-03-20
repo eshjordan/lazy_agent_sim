@@ -33,7 +33,7 @@ def generate_launch_description():
     launch_args = [
         DeclareLaunchArgument("rviz", default_value="true", description="Open RViz."),
         DeclareLaunchArgument(
-            "gz_version", default_value="9", description="Gazebo version."
+            "gz_version", default_value="ionic", description="Gazebo version."
         ),
         SetEnvironmentVariable("GZ_VERSION", LaunchConfiguration("gz_version")),
     ]
