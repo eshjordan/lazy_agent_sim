@@ -22,37 +22,45 @@ def generate_launch_description():
 
     ld = launch.LaunchDescription(
         launch_args
-        + launch_ros.actions.Node(
-            package='cpp_epuck',
-            executable='cpp_epuck',
-            name=f'knowledge_comms_robot{i}',
-            output='screen',
-            parameters=[
-                {
-                    'robot_id': launch.substitutions.LaunchConfiguration(
-                        'robot_id'
-                    ),
-                    'manager_host': launch.substitutions.LaunchConfiguration(
-                        'manager_host'
-                    ),
-                    'manager_port': launch.substitutions.LaunchConfiguration(
-                        'manager_port'
-                    ),
-                    'robot_comms_host': launch.substitutions
-                    .LaunchConfiguration(
-                        'robot_comms_host'
-                    ),
-                    'robot_knowledge_request_port': launch.substitutions
-                    .LaunchConfiguration(
-                        'robot_knowledge_request_port'
-                    ),
-                    'robot_knowledge_exchange_port': launch.substitutions
-                    .LaunchConfiguration(
-                        'robot_knowledge_exchange_port'
-                    ),
-                }
-            ],
-        )
+        + [
+            launch_ros.actions.Node(
+                package='cpp_epuck',
+                executable='cpp_epuck',
+                name='knowledge_comms_robot',
+                output='screen',
+                parameters=[
+                    {
+                        'robot_id': launch.substitutions.LaunchConfiguration(
+                            'robot_id'
+                        ),
+                        'manager_host': launch.substitutions
+                        .LaunchConfiguration(
+                            'manager_host'
+                        ),
+                        'manager_port': launch.substitutions
+                        .LaunchConfiguration(
+                            'manager_port'
+                        ),
+                        'robot_comms_host': launch.substitutions
+                        .LaunchConfiguration(
+                            'robot_comms_host'
+                        ),
+                        'robot_comms_request_port': launch.substitutions
+                        .LaunchConfiguration(
+                            'robot_comms_request_port'
+                        ),
+                        'robot_knowledge_host': launch.substitutions
+                        .LaunchConfiguration(
+                            'robot_knowledge_host'
+                        ),
+                        'robot_knowledge_exchange_port': launch.substitutions
+                        .LaunchConfiguration(
+                            'robot_knowledge_exchange_port'
+                        ),
+                    }
+                ],
+            ),
+        ],
     )
 
     return ld

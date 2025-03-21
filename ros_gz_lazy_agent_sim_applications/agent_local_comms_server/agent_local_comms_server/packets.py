@@ -12,7 +12,8 @@ MAX_BOUNDARY_Z_POINTS = 0
 ROBOT_ID_TYPE_FMT_STR: str = "H"  # ushort
 
 EPUCK_HEARTBEAT_PACKET_FMT_STR: str = (
-    ENDIAN_FMT + f"B{ROBOT_ID_TYPE_FMT_STR}{MAX_HOST_LEN+1}sH{MAX_HOST_LEN+1}sH"
+    ENDIAN_FMT +
+    f"B{ROBOT_ID_TYPE_FMT_STR}{MAX_HOST_LEN+1}sH{MAX_HOST_LEN+1}sH"
 )
 EPUCK_HEARTBEAT_PACKET_ID: int = 0x20
 
@@ -45,8 +46,10 @@ class EpuckHeartbeatPacket:
             )
         args = struct.unpack(EPUCK_HEARTBEAT_PACKET_FMT_STR, buffer)
         obj = cls(*args)
-        obj.robot_comms_host = obj.robot_comms_host.decode("ascii").rstrip("\x00")  # type: ignore
-        obj.robot_knowledge_host = obj.robot_knowledge_host.decode("ascii").rstrip("\x00")  # type: ignore
+        obj.robot_comms_host = obj.robot_comms_host.decode(
+            "ascii").rstrip("\x00")  # type: ignore
+        obj.robot_knowledge_host = obj.robot_knowledge_host.decode(
+            "ascii").rstrip("\x00")  # type: ignore
         return obj
 
     @classmethod
@@ -86,7 +89,7 @@ class EpuckHeartbeatResponsePacket:
         offset = start_len
         for _ in range(min(num_neighbours, MAX_ROBOTS)):
             neighbour = EpuckNeighbourPacket.unpack(
-                buffer[offset : offset + EpuckNeighbourPacket.calcsize()]
+                buffer[offset: offset + EpuckNeighbourPacket.calcsize()]
             )
             offset += EpuckNeighbourPacket.calcsize()
             neighbours.append(neighbour)
@@ -193,8 +196,8 @@ EPUCK_KNOWLEDGE_RECORD_FMT_STR: str = (
 @dataclass
 class EpuckKnowledgeRecord:
     robot_id: int = 0  # see above
-    centroid: Centroid  # Centroid
-    boundary: Boundary  # Boundary
+    centroid: Centroid = Centroid()  # Centroid
+    boundary: Boundary = Boundary([], [], [])  # Boundary
     seq: int = 0x0  # ushort
 
     def pack(self):
@@ -216,20 +219,21 @@ class EpuckKnowledgeRecord:
         start_len = 0
         next_len = struct.calcsize(ROBOT_ID_TYPE_FMT_STR)
         robot_id = struct.unpack(
-            ROBOT_ID_TYPE_FMT_STR, buffer[start_len : start_len + next_len]
+            ROBOT_ID_TYPE_FMT_STR, buffer[start_len: start_len + next_len]
         )
 
         start_len += next_len
         next_len = Centroid.calcsize()
-        centroid = Centroid.unpack(buffer[start_len : start_len + next_len])
+        centroid = Centroid.unpack(buffer[start_len: start_len + next_len])
 
         start_len += next_len
         next_len = Boundary.calcsize()
-        boundary = Boundary.unpack(buffer[start_len : start_len + next_len])
+        boundary = Boundary.unpack(buffer[start_len: start_len + next_len])
 
         start_len += next_len
         next_len = struct.calcsize(SEQ_FMT_STR)
-        seq = struct.unpack(SEQ_FMT_STR, buffer[start_len : start_len + next_len])
+        seq = struct.unpack(
+            SEQ_FMT_STR, buffer[start_len: start_len + next_len])
 
         return cls(
             robot_id=robot_id,
@@ -257,7 +261,8 @@ class EpuckKnowledgeRecord:
         return hash((self.robot_id, self.seq))
 
 
-EPUCK_KNOWLEDGE_PACKET_FMT_STR: str = ENDIAN_FMT + f"B{ROBOT_ID_TYPE_FMT_STR}HB"
+EPUCK_KNOWLEDGE_PACKET_FMT_STR: str = ENDIAN_FMT + \
+    f"B{ROBOT_ID_TYPE_FMT_STR}HB"
 EPUCK_KNOWLEDGE_PACKET_ID: int = 0x22
 
 
@@ -293,7 +298,7 @@ class EpuckKnowledgePacket:
         offset = start_len
         for _ in range(min(N, MAX_ROBOTS)):
             record = EpuckKnowledgeRecord.unpack(
-                buffer[offset : offset + EpuckKnowledgeRecord.calcsize()]
+                buffer[offset: offset + EpuckKnowledgeRecord.calcsize()]
             )
             offset += EpuckKnowledgeRecord.calcsize()
             known_ids.append(record)

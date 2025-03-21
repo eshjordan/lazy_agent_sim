@@ -165,11 +165,10 @@ def include_epuck_implementation() -> list[launch.Action]:
                             'package',
                         ),
                     ),
-                    get_implementation_value(
-                        'epuck_implementation',
-                        'rviz_config',
-                    ),
-                ]
+                ] + get_implementation_value(
+                    'epuck_implementation',
+                    'rviz_config',
+                ),
             ),
         ],
     )
@@ -213,16 +212,16 @@ def include_epuck_implementation() -> list[launch.Action]:
             launch_arguments={
                 'namespace':
                     f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
-                'epuck2_id': agent['robot_id'],
-                'epuck2_address': agent['robot_epuck_host'],
-                'epuck2_port': agent['robot_epuck_port'],
+                'epuck2_id': f"{agent['robot_id']}",
+                'epuck2_address': f"{agent['robot_epuck_host']}",
+                'epuck2_port': f"{agent['robot_epuck_port']}",
                 'epuck2_name':
                     f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
                 'cam_en': 'false',
                 'floor_en': 'false',
-                'xpos': agent['robot_xpos'],
-                'ypos': agent['robot_ypos'],
-                'theta': agent['robot_theta'],
+                'xpos': f"{agent['robot_xpos']}",
+                'ypos': f"{agent['robot_ypos']}",
+                'theta': f"{agent['robot_theta']}",
                 'is_single_robot': 'false',
                 'sim_en': 'false',
             }.items(),
@@ -256,16 +255,22 @@ def include_comms_manager_implementation() -> list[launch.Action]:
             )
         ),
         launch_arguments={
-            'server_host': launch_configuration['manager_server_host'],
-            'server_port': launch_configuration['manager_server_port'],
-            'threshold_dist': launch_configuration['manager_threshold_dist'],
-            'robot_tf_prefix': launch_configuration['manager_robot_tf_prefix'],
-            'robot_tf_suffix': launch_configuration['manager_robot_tf_suffix'],
-            'robot_tf_frame': launch_configuration['manager_robot_tf_frame'],
+            'server_host':
+                f"{launch_configuration['manager_server_host']}",
+            'server_port':
+                f"{launch_configuration['manager_server_port']}",
+            'threshold_dist':
+                f"{launch_configuration['manager_threshold_dist']}",
+            'robot_tf_prefix':
+                f"{launch_configuration['manager_robot_tf_prefix']}",
+            'robot_tf_suffix':
+                f"{launch_configuration['manager_robot_tf_suffix']}",
+            'robot_tf_frame':
+                f"{launch_configuration['manager_robot_tf_frame']}",
             **{
-                f'remap_ids/{i}': agent['robot_id']
+                f'remap_ids/{i}': f"{agent['robot_id']}"
                 for i, agent in enumerate(launch_configuration['agents'])
-            },
+                },
         }.items(),
     )
 
@@ -298,14 +303,20 @@ def include_agent_comms_implementations() -> list[launch.Action]:
                 )
             ),
             launch_arguments={
-                'robot_id': agent['robot_id'],
-                'manager_host': launch_configuration['manager_server_host'],
-                'manager_port': launch_configuration['manager_server_port'],
-                'robot_comms_host': agent['robot_comms_host'],
-                'robot_comms_request_port': agent['robot_comms_request_port'],
-                'robot_knowledge_host': agent['robot_knowledge_host'],
+                'robot_id':
+                    f"{agent['robot_id']}",
+                'manager_host':
+                    f"{launch_configuration['manager_server_host']}",
+                'manager_port':
+                    f"{launch_configuration['manager_server_port']}",
+                'robot_comms_host':
+                    f"{agent['robot_comms_host']}",
+                'robot_comms_request_port':
+                    f"{agent['robot_comms_request_port']}",
+                'robot_knowledge_host':
+                    f"{agent['robot_knowledge_host']}",
                 'robot_knowledge_exchange_port':
-                    agent['robot_knowledge_exchange_port'],
+                    f"{agent['robot_knowledge_exchange_port']}",
             }.items(),
         )
 
@@ -319,9 +330,9 @@ def launch_teleop() -> list[launch.Action]:
 
     def get_namespace(i: int):
         return (
-            launch_configuration['manager_robot_tf_prefix'],
+            f"{launch_configuration['manager_robot_tf_prefix']}",
             f'{i}',
-            launch_configuration['manager_robot_tf_suffix'],
+            f"{launch_configuration['manager_robot_tf_suffix']}",
         )
 
     result = []
@@ -350,7 +361,7 @@ def launch_teleop() -> list[launch.Action]:
                     (
                         'frame_id:=',
                         *get_namespace(i),
-                        launch_configuration['manager_robot_tf_frame'],
+                        f"{launch_configuration['manager_robot_tf_frame']}",
                     ),
                     '"',
                 ],
@@ -372,6 +383,7 @@ def generate_launch_description():
         + launch_teleop()
         + []
     )
+    # breakpoint()
     return ld
 
 
