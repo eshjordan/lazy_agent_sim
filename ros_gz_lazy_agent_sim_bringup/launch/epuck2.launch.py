@@ -49,6 +49,7 @@ def generate_launch_description():
             ),
             {
                 "gz_version": "9",
+                "gui": "true",
                 "manager_robot_tf_prefix": "epuck2_robot_",
                 "manager_robot_tf_suffix": "",
                 "manager_robot_tf_frame": "/base_link",
@@ -70,6 +71,7 @@ def generate_launch_description():
             PathJoinSubstitution([ros_gz_sim, "launch", "gz_sim.launch.py"]),
         ),
         launch_arguments={"gz_args": "-g"}.items(),
+        condition=IfCondition(LaunchConfiguration("gui")),
     )
 
     # Bridge ROS topics and Gazebo messages for establishing communication

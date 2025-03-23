@@ -19,8 +19,9 @@ from launch_ros.substitutions import FindPackageShare
 
 
 launch_configuration = {
-    # 'epuck_implementation': 'epuck_driver_cpp',
-    'epuck_implementation': 'gz_model_py',
+    'epuck_implementation': 'epuck_driver_cpp',
+    # 'epuck_implementation': 'gz_model_py',
+    # 'epuck_implementation': 'gz_model_headless_py',
     'comms_manager_implementation': 'central_node_py',
     # 'agent_comms_implementation': 'udp_cpp',
     # 'agent_comms_implementation': 'udp_py',
@@ -43,7 +44,7 @@ launch_configuration = {
             'robot_xpos': -0.1,
             'robot_ypos': -0.1,
             'robot_theta': 0.0,
-            'robot_teleop': True,
+            'robot_teleop': False,
         },
         {
             'robot_id': 1,
@@ -107,6 +108,21 @@ implementations = {
                 'config',
                 'epuck2.rviz',
             ),
+            'extra_args': {
+                'gui': 'true',
+            },
+        },
+        'gz_model_headless_py': {
+            'package': 'ros_gz_lazy_agent_sim_bringup',
+            'launchfile': 'epuck2.launch.py',
+            'oneshot': True,
+            'rviz_config': os.path.join(
+                'config',
+                'epuck2.rviz',
+            ),
+            'extra_args': {
+                'gui': 'false',
+            },
         },
     },
     'comms_manager_implementation': {
@@ -151,35 +167,47 @@ def get_implementation_value(
         launch_configuration[implementation]
     ][value] if value in implementations[implementation][
         launch_configuration[implementation]
-    ] else ''
+    ] else None
 
 
 def include_epuck_implementation() -> list[launch.Action]:
     """Include the epuck implementation."""
 
-    _rviz = launch_ros.actions.Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        output='screen',
-        arguments=[
-            '-d',
-            PathJoin(
-                [
-                    FindPackageShare(
-                        get_implementation_value(
-                            'epuck_implementation',
-                            'package',
-                        ),
-                    ),
-                    get_implementation_value(
-                        'epuck_implementation',
-                        'rviz_config',
-                    ),
-                ]
-            ),
-        ],
+    result = []
+
+    rviz_config = get_implementation_value(
+        'epuck_implementation',
+        'rviz_config',
     )
+
+    extra_args = get_implementation_value(
+        'epuck_implementation',
+        'extra_args',
+    )
+
+    if rviz_config:
+        _rviz = launch_ros.actions.Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            output='screen',
+            arguments=[
+                '-d',
+                PathJoin(
+                    [
+                        FindPackageShare(
+                            get_implementation_value(
+                                'epuck_implementation',
+                                'package',
+                            ),
+                        ),
+                        rviz_config,
+                    ]
+                ),
+            ],
+        )
+
+        result.append(_rviz)
 
     _static_tf_pub = launch_ros.actions.Node(
         package='tf2_ros',
@@ -194,11 +222,33 @@ def include_epuck_implementation() -> list[launch.Action]:
         ],
     )
 
+    result.append(_static_tf_pub)
+
     nodes = []
 
     if not get_implementation_value('epuck_implementation', 'oneshot'):
         # breakpoint()  # not oneshot
         for i, agent in enumerate(launch_configuration['agents']):
+
+            launch_arguments = {
+                'namespace':
+                    f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
+                'epuck2_id': f"{agent['robot_id']}",
+                'epuck2_address': f"{agent['robot_epuck_host']}",
+                'epuck2_port': f"{agent['robot_epuck_port']}",
+                'epuck2_name':
+                    f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
+                'cam_en': 'false',
+                'floor_en': 'false',
+                'xpos': f"{agent['robot_xpos']}",
+                'ypos': f"{agent['robot_ypos']}",
+                'theta': f"{agent['robot_theta']}",
+                'is_single_robot': 'false',
+                'sim_en': 'false',
+            }
+
+            launch_arguments.update(extra_args if extra_args else {})
+
             _include = IncludeLaunch(
                 PythonLaunch(
                     PathJoin(
@@ -217,22 +267,7 @@ def include_epuck_implementation() -> list[launch.Action]:
                         ]
                     )
                 ),
-                launch_arguments={
-                    'namespace':
-                        f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
-                    'epuck2_id': f"{agent['robot_id']}",
-                    'epuck2_address': f"{agent['robot_epuck_host']}",
-                    'epuck2_port': f"{agent['robot_epuck_port']}",
-                    'epuck2_name':
-                        f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
-                    'cam_en': 'false',
-                    'floor_en': 'false',
-                    'xpos': f"{agent['robot_xpos']}",
-                    'ypos': f"{agent['robot_ypos']}",
-                    'theta': f"{agent['robot_theta']}",
-                    'is_single_robot': 'false',
-                    'sim_en': 'false',
-                }.items(),
+                launch_arguments=launch_arguments.items(),
             )
 
             nodes.append(_include)
@@ -256,30 +291,14 @@ def include_epuck_implementation() -> list[launch.Action]:
                     ]
                 )
             ),
+            launch_arguments=extra_args.items(),
         )
 
         nodes.append(_include)
 
-    retval = [
-        _rviz,
-        TimerAction(
-            period=2.0,
-            actions=[
-                TimerAction(
-                    period=2.0,
-                    actions=[
-                        _static_tf_pub,
-                        TimerAction(
-                            period=2.0,
-                            actions=nodes,
-                        )
-                    ]
-                )
-            ]
-        )
-    ]
+    result.append(TimerAction(period=2.0, actions=nodes))
 
-    return retval
+    return result
 
 
 def include_comms_manager_implementation() -> list[launch.Action]:
@@ -320,7 +339,7 @@ def include_comms_manager_implementation() -> list[launch.Action]:
             **{
                 f'remap_ids/{i}': f"{agent['robot_id']}"
                 for i, agent in enumerate(launch_configuration['agents'])
-            },
+                },
         }.items(),
     )
 
