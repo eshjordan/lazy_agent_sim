@@ -195,9 +195,9 @@ EPUCK_KNOWLEDGE_RECORD_FMT_STR: str = (
 
 @dataclass
 class EpuckKnowledgeRecord:
+    centroid: Centroid  # Centroid
+    boundary: Boundary  # Boundary
     robot_id: int = 0  # see above
-    centroid: Centroid = Centroid()  # Centroid
-    boundary: Boundary = Boundary([], [], [])  # Boundary
     seq: int = 0x0  # ushort
 
     def pack(self):

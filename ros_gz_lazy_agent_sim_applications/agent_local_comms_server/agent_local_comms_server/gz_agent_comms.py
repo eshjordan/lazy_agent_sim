@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 
-from gz.msgs10.dataframe_pb2 import Dataframe
-from gz.transport13 import Node
+try:
+    from gz.msgs11.dataframe_pb2 import Dataframe
+except ImportError:
+    from gz.msgs10.dataframe_pb2 import Dataframe
+
+try:
+    from gz.transport14 import Node
+except ImportError:
+    from gz.transport13 import Node
 
 import rclpy
 import rclpy.node
@@ -182,7 +189,8 @@ class GZKnowledgeClient(BaseKnowledgeClient):
 def main():
     rclpy.init()
     node = rclpy.node.Node("robot_comms_model")
-    robot_id = node.declare_parameter("robot_id", 0).get_parameter_value().integer_value
+    robot_id = node.declare_parameter(
+        "robot_id", 0).get_parameter_value().integer_value
     manager_host = (
         node.declare_parameter("manager_host", "127.0.0.1")
         .get_parameter_value()
