@@ -19,9 +19,9 @@ from launch_ros.substitutions import FindPackageShare
 
 
 launch_configuration = {
-    'epuck_implementation': 'epuck_driver_cpp',
+    # 'epuck_implementation': 'epuck_driver_cpp',
     # 'epuck_implementation': 'gz_model_py',
-    # 'epuck_implementation': 'gz_model_headless_py',
+    'epuck_implementation': 'gz_model_headless_py',
     'comms_manager_implementation': 'central_node_py',
     # 'agent_comms_implementation': 'udp_cpp',
     # 'agent_comms_implementation': 'udp_py',
@@ -39,12 +39,13 @@ launch_configuration = {
             'robot_epuck_port': 10000,
             'robot_comms_host': '192.168.0.2',
             'robot_comms_request_port': 50002,
-            'robot_knowledge_host': '192.168.0.2',
+            # 'robot_knowledge_host': '192.168.0.2',
+            'robot_knowledge_host': 'aa:bb:cc:dd:ee:00',
             'robot_knowledge_exchange_port': 50003,
             'robot_xpos': -0.1,
             'robot_ypos': -0.1,
             'robot_theta': 0.0,
-            'robot_teleop': False,
+            'robot_teleop': True,
         },
         {
             'robot_id': 1,
@@ -52,7 +53,8 @@ launch_configuration = {
             'robot_epuck_port': 10001,
             'robot_comms_host': '192.168.0.2',
             'robot_comms_request_port': 50004,
-            'robot_knowledge_host': '192.168.0.2',
+            # 'robot_knowledge_host': '192.168.0.2',
+            'robot_knowledge_host': 'aa:bb:cc:dd:ee:01',
             'robot_knowledge_exchange_port': 50005,
             'robot_xpos': -0.1,
             'robot_ypos': 0.1,
@@ -65,7 +67,8 @@ launch_configuration = {
             'robot_epuck_port': 10002,
             'robot_comms_host': '192.168.0.2',
             'robot_comms_request_port': 50006,
-            'robot_knowledge_host': '192.168.0.2',
+            # 'robot_knowledge_host': '192.168.0.2',
+            'robot_knowledge_host': 'aa:bb:cc:dd:ee:02',
             'robot_knowledge_exchange_port': 50007,
             'robot_xpos': 0.1,
             'robot_ypos': -0.1,
@@ -78,7 +81,8 @@ launch_configuration = {
             'robot_epuck_port': 10003,
             'robot_comms_host': '192.168.0.2',
             'robot_comms_request_port': 50008,
-            'robot_knowledge_host': '192.168.0.2',
+            # 'robot_knowledge_host': '192.168.0.2',
+            'robot_knowledge_host': 'aa:bb:cc:dd:ee:03',
             'robot_knowledge_exchange_port': 50009,
             'robot_xpos': 0.1,
             'robot_ypos': 0.1,
@@ -374,9 +378,9 @@ def include_agent_comms_implementations() -> list[launch.Action]:
             launch_arguments={
                 'robot_id':
                     f"{agent['robot_id']}",
-                'manager_host':
+                'manager_server_host':
                     f"{launch_configuration['manager_server_host']}",
-                'manager_port':
+                'manager_server_port':
                     f"{launch_configuration['manager_server_port']}",
                 'robot_comms_host':
                     f"{agent['robot_comms_host']}",

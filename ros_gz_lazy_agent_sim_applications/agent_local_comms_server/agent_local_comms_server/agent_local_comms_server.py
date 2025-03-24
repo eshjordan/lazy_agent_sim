@@ -21,6 +21,8 @@ import tf2_ros.transform_listener
 from lazy_agent_sim_interfaces.msg import (
     EpuckKnowledgePacket as EpuckKnowledgePacketMsg,
     EpuckKnowledgeRecord as EpuckKnowledgeRecordMsg,
+    Boundary as BoundaryMsg,
+    Centroid as CentroidMsg,
 )
 
 
@@ -73,7 +75,8 @@ class LocalCommsManager(rclpy.node.Node):
 
         server_host = self.get_parameter("server_host").value
         server_port = self.get_parameter("server_port").value
-        self.get_logger().info(f"Starting server on {server_host}:{server_port}")
+        self.get_logger().info(
+            f"Starting server on {server_host}:{server_port}")
         self.server = ThreadingUDPServer(
             (server_host, server_port), self.create_request_handler()
         )
@@ -84,7 +87,8 @@ class LocalCommsManager(rclpy.node.Node):
         self.server_thread.daemon = True
         self.server_thread.start()
 
-        self.knowledge_request_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.knowledge_request_client = socket.socket(
+            socket.AF_INET, socket.SOCK_DGRAM)
         self.knowledge_request_timer.reset()
 
     def stop(self):
@@ -101,7 +105,8 @@ class LocalCommsManager(rclpy.node.Node):
         id_str = str(id)
 
         if remap:
-            remappings = self.get_parameters([f"remap_ids/{id}" for id in range(4)])
+            remappings = self.get_parameters(
+                [f"remap_ids/{id}" for id in range(4)])
 
             for remapping in remappings:
                 if remapping.value == id:
@@ -233,7 +238,8 @@ class LocalCommsManager(rclpy.node.Node):
 
                 # Send response with all neighbour ids and distances
                 neighbour_packets = [
-                    EpuckNeighbourPacket(robot_id=id, host=host, port=port, dist=dist)
+                    EpuckNeighbourPacket(
+                        robot_id=id, host=host, port=port, dist=dist)
                     for id, host, port, dist in neighbours
                 ]
 
@@ -295,12 +301,14 @@ class LocalCommsManager(rclpy.node.Node):
                 known_ids=[
                     EpuckKnowledgeRecordMsg(
                         robot_id=known_id.robot_id,
-                        centroid=known_id.centroid,
-                        boundary=known_id.boundary,
-                        seq=known_id.seq,
+                        centroid=CentroidMsg(
+                            x=known_id.centroid.x, y=known_id.centroid.y, z=known_id.centroid.z),
+                        boundary=BoundaryMsg(x_points=known_id.boundary.x_points,
+                                             y_points=known_id.boundary.y_points, z_points=known_id.boundary.z_points),
+                        seq=known_id.seq
                     )
                     for known_id in response.known_ids
-                ],
+                ]
             )
 
             self.knowledge_request_publisher.publish(msg_response)

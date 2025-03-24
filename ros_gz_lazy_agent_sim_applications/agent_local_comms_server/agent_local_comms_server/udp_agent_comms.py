@@ -56,7 +56,8 @@ class UDPKnowledgeServer(BaseKnowledgeServer):
                 request = EpuckKnowledgePacket.unpack(data)
 
                 other_known_ids = set(request.known_ids)
-                difference = other_known_ids.difference(robot_model.GetKnownIds())
+                difference = other_known_ids.difference(
+                    robot_model.GetKnownIds())
                 robot_model.InsertKnownIds(other_known_ids)
 
                 if len(difference) > 0:
@@ -119,7 +120,8 @@ class UDPKnowledgeClient(BaseKnowledgeClient):
                 f"Sending knowledge to {self.neighbour.robot_id} ({self.neighbour.host}:{self.neighbour.port}): {self.robot_model.GetKnownIds()}"
             )
 
-            data, retaddr = self.client.recvfrom(EpuckKnowledgePacket.calcsize())
+            data, retaddr = self.client.recvfrom(
+                EpuckKnowledgePacket.calcsize())
             if len(data) == 0:
                 self.robot_model.logger.warning(
                     f"({self.neighbour.host}:{self.neighbour.port}) disconnected"
@@ -129,7 +131,8 @@ class UDPKnowledgeClient(BaseKnowledgeClient):
             response = EpuckKnowledgePacket.unpack(data)
 
             other_known_ids = set(response.known_ids)
-            difference = other_known_ids.difference(self.robot_model.GetKnownIds())
+            difference = other_known_ids.difference(
+                self.robot_model.GetKnownIds())
             self.robot_model.InsertKnownIds(other_known_ids)
 
             if len(difference) > 0:
@@ -151,14 +154,18 @@ class UDPKnowledgeClient(BaseKnowledgeClient):
 def main():
     rclpy.init()
     node = rclpy.node.Node("robot_comms_model")
-    robot_id = node.declare_parameter("robot_id", 0).get_parameter_value().integer_value
-    manager_host = (
-        node.declare_parameter("manager_host", "127.0.0.1")
+    robot_id = (
+        node.declare_parameter("robot_id", 0)
+        .get_parameter_value()
+        .integer_value
+    )
+    manager_server_host = (
+        node.declare_parameter("manager_server_host", "127.0.0.1")
         .get_parameter_value()
         .string_value
     )
-    manager_port = (
-        node.declare_parameter("manager_port", 50000)
+    manager_server_port = (
+        node.declare_parameter("manager_server_port", 50000)
         .get_parameter_value()
         .integer_value
     )
@@ -185,8 +192,8 @@ def main():
     logger = node.get_logger()
     robot_model = RobotCommsModel(
         robot_id,
-        manager_host,
-        manager_port,
+        manager_server_host,
+        manager_server_port,
         robot_comms_host,
         robot_comms_request_port,
         robot_knowledge_host,

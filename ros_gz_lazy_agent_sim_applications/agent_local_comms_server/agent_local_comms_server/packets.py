@@ -157,9 +157,12 @@ class Centroid:
         return struct.calcsize(CENTROID_FMT_STR)
 
 
+BOUNDARY_X_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_X_POINTS}f'
+BOUNDARY_Y_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_Y_POINTS}f'
+BOUNDARY_Z_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_Z_POINTS}f'
 BOUNDARY_FMT_STR: str = (
     ENDIAN_FMT
-    + f"f{MAX_BOUNDARY_X_POINTS}f{MAX_BOUNDARY_Y_POINTS}f{MAX_BOUNDARY_Z_POINTS}f"
+    + f'{BOUNDARY_X_POINTS_FMT_STR}{BOUNDARY_Y_POINTS_FMT_STR}{BOUNDARY_Z_POINTS_FMT_STR}'
 )
 
 
@@ -170,16 +173,38 @@ class Boundary:
     z_points: list[float]
 
     def pack(self):
+        padded_x_points = self.x_points + [0.0] * (
+            MAX_BOUNDARY_X_POINTS - len(self.x_points)
+        )
+        padded_y_points = self.y_points + [0.0] * (
+            MAX_BOUNDARY_Y_POINTS - len(self.y_points)
+        )
+        padded_z_points = self.z_points + [0.0] * (
+            MAX_BOUNDARY_Z_POINTS - len(self.z_points)
+        )
         return struct.pack(
             BOUNDARY_FMT_STR,
-            *self.x_points[:MAX_BOUNDARY_X_POINTS],
-            *self.y_points[:MAX_BOUNDARY_Y_POINTS],
-            *self.z_points[:MAX_BOUNDARY_Z_POINTS],
+            *padded_x_points,
+            *padded_y_points,
+            *padded_z_points,
         )
 
     @classmethod
     def unpack(cls, buffer: bytes):
-        return cls(*struct.unpack(BOUNDARY_FMT_STR, buffer))
+        start_len = 0
+        next_len = struct.calcsize(BOUNDARY_X_POINTS_FMT_STR)
+        x_points = [
+            *struct.unpack(BOUNDARY_X_POINTS_FMT_STR, buffer[start_len: start_len + next_len])]
+        start_len += next_len
+        next_len = struct.calcsize(BOUNDARY_Y_POINTS_FMT_STR)
+        y_points = [
+            *struct.unpack(BOUNDARY_Y_POINTS_FMT_STR, buffer[start_len: start_len + next_len])]
+        start_len += next_len
+        next_len = struct.calcsize(BOUNDARY_Z_POINTS_FMT_STR)
+        z_points = [
+            *struct.unpack(BOUNDARY_Z_POINTS_FMT_STR, buffer[start_len: start_len + next_len])]
+
+        return cls(x_points=x_points, y_points=y_points, z_points=z_points)
 
     @classmethod
     def calcsize(cls):
@@ -189,7 +214,7 @@ class Boundary:
 SEQ_FMT_STR: str = "H"  # ushort
 EPUCK_KNOWLEDGE_RECORD_FMT_STR: str = (
     ENDIAN_FMT
-    + f"{ROBOT_ID_TYPE_FMT_STR}{CENTROID_FMT_STR}{BOUNDARY_FMT_STR}{SEQ_FMT_STR}"
+    + f"{ROBOT_ID_TYPE_FMT_STR}{CENTROID_FMT_STR[1:]}{BOUNDARY_FMT_STR[1:]}{SEQ_FMT_STR}"
 )
 
 
@@ -220,7 +245,7 @@ class EpuckKnowledgeRecord:
         next_len = struct.calcsize(ROBOT_ID_TYPE_FMT_STR)
         robot_id = struct.unpack(
             ROBOT_ID_TYPE_FMT_STR, buffer[start_len: start_len + next_len]
-        )
+        )[0]
 
         start_len += next_len
         next_len = Centroid.calcsize()
@@ -233,7 +258,7 @@ class EpuckKnowledgeRecord:
         start_len += next_len
         next_len = struct.calcsize(SEQ_FMT_STR)
         seq = struct.unpack(
-            SEQ_FMT_STR, buffer[start_len: start_len + next_len])
+            SEQ_FMT_STR, buffer[start_len: start_len + next_len])[0]
 
         return cls(
             robot_id=robot_id,

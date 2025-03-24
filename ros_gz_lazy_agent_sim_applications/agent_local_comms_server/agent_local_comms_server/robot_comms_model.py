@@ -86,7 +86,10 @@ class BaseRobotCommsModel:
                 (
                     robot_id,
                     EpuckKnowledgeRecord(
-                        self.robot_id, self.centroid_, self.boundary_, self.GetSeq()
+                        robot_id=self.robot_id,
+                        centroid=self.centroid_,
+                        boundary=self.boundary_,
+                        seq=self.GetSeq(),
                     ),
                 )
             ]
@@ -126,7 +129,12 @@ class BaseRobotCommsModel:
         # Update the sequence number of the internal record for this robot, so it matches the one in the response
         seq = self.GetSeq()
         new_record = [
-            EpuckKnowledgeRecord(self.robot_id, self.centroid_, self.boundary_, seq)
+            EpuckKnowledgeRecord(
+                robot_id=self.robot_id,
+                centroid=self.centroid_,
+                boundary=self.boundary_,
+                seq=seq,
+            )
         ]
         self.InsertKnownIds(new_record)
 
@@ -231,7 +239,8 @@ class RobotCommsModel(BaseRobotCommsModel):
         super().__del__()
 
     def start(self):
-        self.heartbeat_thread = threading.Thread(target=self.exchange_heartbeats)
+        self.heartbeat_thread = threading.Thread(
+            target=self.exchange_heartbeats)
         self.heartbeat_thread.daemon = True
         self.heartbeat_thread.start()
 
@@ -249,7 +258,8 @@ class RobotCommsModel(BaseRobotCommsModel):
         self.knowledge_server = self.KnowledgeServerClass(self)
         self.knowledge_server.start()
 
-        self.heartbeat_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.heartbeat_client = socket.socket(
+            socket.AF_INET, socket.SOCK_DGRAM)
 
         self.knowledge_clients = {}
 
@@ -314,7 +324,8 @@ class RobotCommsModel(BaseRobotCommsModel):
             ]
 
             for neighbour_id in out_of_range_neighbour_ids:
-                self.logger.info(f"Stopping thread for neighbour {neighbour_id}")
+                self.logger.info(
+                    f"Stopping thread for neighbour {neighbour_id}")
                 knowledge_client = self.knowledge_clients.pop(neighbour_id)
                 knowledge_client.stop()
 

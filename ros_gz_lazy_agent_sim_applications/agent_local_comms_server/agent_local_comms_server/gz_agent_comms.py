@@ -189,15 +189,18 @@ class GZKnowledgeClient(BaseKnowledgeClient):
 def main():
     rclpy.init()
     node = rclpy.node.Node("robot_comms_model")
-    robot_id = node.declare_parameter(
-        "robot_id", 0).get_parameter_value().integer_value
-    manager_host = (
-        node.declare_parameter("manager_host", "127.0.0.1")
+    robot_id = (
+        node.declare_parameter("robot_id", 0)
+        .get_parameter_value()
+        .integer_value
+    )
+    manager_server_host = (
+        node.declare_parameter("manager_server_host", "127.0.0.1")
         .get_parameter_value()
         .string_value
     )
-    manager_port = (
-        node.declare_parameter("manager_port", 50000)
+    manager_server_port = (
+        node.declare_parameter("manager_server_port", 50000)
         .get_parameter_value()
         .integer_value
     )
@@ -224,8 +227,8 @@ def main():
     logger = node.get_logger()
     robot_model = RobotCommsModel(
         robot_id,
-        manager_host,
-        manager_port,
+        manager_server_host,
+        manager_server_port,
         robot_comms_host,
         robot_comms_request_port,
         robot_knowledge_host,
