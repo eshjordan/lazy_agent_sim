@@ -27,6 +27,7 @@ launch_configuration = {
     # 'agent_comms_implementation': 'udp_cpp',
     # 'agent_comms_implementation': 'udp_py',
     # 'agent_comms_implementation': 'gz_rf_py',
+    'waypoint_controller_implementation': 'waypoint_controller_py',
     'manager_server_host': '192.168.0.2',
     'manager_server_port': 50000,
     'manager_threshold_dist': 0.1,
@@ -174,6 +175,13 @@ implementations = {
             'launchfile': 'gz_agent.launch.py',
         },
     },
+    'waypoint_controller_implementation': {
+        'waypoint_controller_py': {
+            'package': 'waypoint_controller',
+            'launchfile': 'main.launch.py',
+            'oneshot': False,
+        },
+    },
 }
 
 
@@ -201,7 +209,6 @@ def get_implementation_value(
 
 def include_epuck_implementation() -> list[launch.Action]:
     """Include the epuck implementation."""
-
     result = []
 
     rviz_config = get_implementation_value(
@@ -431,6 +438,85 @@ def include_agent_comms_implementations() -> list[launch.Action]:
     return result
 
 
+def include_waypoint_controller_implementation() -> list[launch.Action]:
+    """Include the waypoint controller implementation."""
+    result = []
+
+    launchfile = get_implementation_value(
+        'waypoint_controller_implementation',
+        'launchfile',
+    )
+
+    if not launchfile:
+        return result
+
+    if not get_implementation_value('epuck_implementation', 'oneshot'):
+        for i, agent in enumerate(launch_configuration['agents']):
+            _include = IncludeLaunch(
+                PythonLaunch(
+                    PathJoin(
+                        [
+                            FindPackageShare(
+                                get_implementation_value(
+                                    'waypoint_controller_implementation',
+                                    'package',
+                                ),
+                            ),
+                            'launch',
+                            get_implementation_value(
+                                'waypoint_controller_implementation',
+                                'launchfile',
+                            ),
+                        ]
+                    )
+                ),
+                launch_arguments={
+                    'robot_id':
+                        f"{agent['robot_id']}",
+                    'robot_tf_prefix':
+                        f"{launch_configuration['manager_robot_tf_prefix']}",
+                    'robot_tf_suffix':
+                        f"{launch_configuration['manager_robot_tf_suffix']}",
+                    'robot_tf_frame':
+                        f"{launch_configuration['manager_robot_tf_frame']}",
+                }.items(),
+            )
+
+            result.append(_include)
+    else:
+        _include = IncludeLaunch(
+            PythonLaunch(
+                PathJoin(
+                    [
+                        FindPackageShare(
+                            get_implementation_value(
+                                'waypoint_controller_implementation',
+                                'package',
+                            ),
+                        ),
+                        'launch',
+                        get_implementation_value(
+                            'waypoint_controller_implementation',
+                            'launchfile',
+                        ),
+                    ]
+                )
+            ),
+            launch_arguments={
+                'robot_tf_prefix':
+                    f"{launch_configuration['manager_robot_tf_prefix']}",
+                'robot_tf_suffix':
+                    f"{launch_configuration['manager_robot_tf_suffix']}",
+                'robot_tf_frame':
+                    f"{launch_configuration['manager_robot_tf_frame']}",
+            }.items(),
+        )
+
+        result.append(_include)
+
+    return result
+
+
 def launch_teleop() -> list[launch.Action]:
     """Launch teleop nodes for robots that require it."""
 
@@ -490,6 +576,7 @@ def generate_launch_description():
     actions = include_epuck_implementation() + \
         include_comms_manager_implementation() + \
         include_agent_comms_implementations() + \
+        include_waypoint_controller_implementation() + \
         launch_teleop()
 
     ld = launch.LaunchDescription(
