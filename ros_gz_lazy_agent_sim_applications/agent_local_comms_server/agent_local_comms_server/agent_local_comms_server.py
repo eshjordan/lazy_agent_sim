@@ -56,6 +56,7 @@ class LocalCommsManager(rclpy.node.Node):
         self.server = None
         self.server_thread = None
         self.known_robots: set[tuple[int, str, int]] = set()
+        self.known_robots_mut = threading.Lock()
 
         self.current_neighbours: dict[int, set[int]] = {}
 
@@ -150,40 +151,42 @@ class LocalCommsManager(rclpy.node.Node):
                     )
                     return
 
-                manager.get_logger().debug(
-                    f"manager.known_robots: {manager.known_robots}"
-                )
+                with manager.known_robots_mut:
 
-                if (
-                    heartbeat.robot_id,
-                    heartbeat.robot_comms_host,
-                    heartbeat.robot_comms_request_port,
-                    heartbeat.robot_knowledge_host,
-                    heartbeat.robot_knowledge_exchange_port,
-                ) not in manager.known_robots:
-                    manager.known_robots.add(
-                        (
-                            heartbeat.robot_id,
-                            heartbeat.robot_comms_host,
-                            heartbeat.robot_comms_request_port,
-                            heartbeat.robot_knowledge_host,
-                            heartbeat.robot_knowledge_exchange_port,
+                    manager.get_logger().debug(
+                        f"manager.known_robots: {manager.known_robots}"
+                    )
+
+                    if (
+                        heartbeat.robot_id,
+                        heartbeat.robot_comms_host,
+                        heartbeat.robot_comms_request_port,
+                        heartbeat.robot_knowledge_host,
+                        heartbeat.robot_knowledge_exchange_port,
+                    ) not in manager.known_robots:
+                        manager.known_robots.add(
+                            (
+                                heartbeat.robot_id,
+                                heartbeat.robot_comms_host,
+                                heartbeat.robot_comms_request_port,
+                                heartbeat.robot_knowledge_host,
+                                heartbeat.robot_knowledge_exchange_port,
+                            )
                         )
-                    )
 
-                frame = manager.robot_frame_name(heartbeat.robot_id)
+                    frame = manager.robot_frame_name(heartbeat.robot_id)
 
-                # Find neighbouring robots
-                known_frames = [
-                    (
-                        id,
-                        knowledge_host,
-                        knowledge_exchange_port,
-                        manager.robot_frame_name(id),
-                    )
-                    for id, _, _, knowledge_host, knowledge_exchange_port in manager.known_robots
-                    if id != heartbeat.robot_id
-                ]
+                    # Find neighbouring robots
+                    known_frames = [
+                        (
+                            id,
+                            knowledge_host,
+                            knowledge_exchange_port,
+                            manager.robot_frame_name(id),
+                        )
+                        for id, _, _, knowledge_host, knowledge_exchange_port in manager.known_robots
+                        if id != heartbeat.robot_id
+                    ]
 
                 # Get all transforms to known frames
                 transforms = [
@@ -259,13 +262,16 @@ class LocalCommsManager(rclpy.node.Node):
         return Handler
 
     def request_knowledge(self):
+        with self.known_robots_mut:
+            known_robots_copy = self.known_robots.copy()
+
         for (
             robot_id,
             robot_comms_host,
             robot_comms_request_port,
             _,
             _,
-        ) in self.known_robots:
+        ) in known_robots_copy:
             self.get_logger().debug(f"Requesting knowledge from {robot_id}")
 
             request = EpuckKnowledgePacket(
