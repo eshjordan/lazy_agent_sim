@@ -26,7 +26,7 @@ public:
         const uint16_t robot_comms_request_port      = 0x789;
         host_size_string robot_knowledge_host        = "robot_knldg_hst";
         const uint16_t robot_knowledge_exchange_port = 0xabc;
-        auto network_factory                         = std::make_shared<NetworkFactory>();
+        auto network_factory                         = std::make_shared<MockNetworkFactory>();
 
         model = std::make_shared<RobotCommsModel<UDPKnowledgeServer, UDPKnowledgeClient>>(
             robot_id, manager_host, manager_port, robot_comms_host, robot_comms_request_port, robot_knowledge_host,
