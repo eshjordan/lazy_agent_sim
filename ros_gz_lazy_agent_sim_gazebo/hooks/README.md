@@ -1,16 +1,16 @@
 # Hooks
 
-The `ament_environment_hooks` is a feature of `ament` that allows users to set arbitrary environment variables as part of sourcing the environment. It is briefly documented [here](https://docs.ros.org/en/rolling/How-To-Guides/Ament-CMake-Documentation.html#adding-to-the-ament-index).
+The `ament_environment_hooks` is a feature of `ament` that allows users to set arbitrary environment variables as part of sourcing the environment. It is briefly documented [here](https://docs.ros.org/en/jazzy/How-To-Guides/Ament-CMake-Documentation.html#adding-to-the-ament-index).
 
 In practice, this means that variables that are set in that folder are set when you call `setup.sh` or are set when dependent packages are being built.
 
 These are populated and installed as part of these function calls:
 
 ```txt
- # The following hooks are used to ensure that the correct environment variables 
- # will be set by executing 'source install/setup.bash' after compilation. 
- # When using this template for your project, change the filenames of the 
- # files in the 'hooks' folder, to correspond to your project name. 
+ # The following hooks are used to ensure that the correct environment variables
+ # will be set by executing 'source install/setup.bash' after compilation.
+ # When using this template for your project, change the filenames of the
+ # files in the 'hooks' folder, to correspond to your project name.
 ament_environment_hooks("${CMAKE_CURRENT_SOURCE_DIR}/hooks/${PROJECT_NAME}.dsv.in")
 ament_environment_hooks("${CMAKE_CURRENT_SOURCE_DIR}/hooks/${PROJECT_NAME}.sh.in")
 ```

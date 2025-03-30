@@ -4,12 +4,43 @@
   xsi:noNamespaceSchemaLocation="http://sdformat.org/schemas/root.xsd"
 >
   <model name='epuck2'>
+
+    <plugin
+      filename="gz-sim-diff-drive-system"
+      name="gz::sim::systems::DiffDrive">
+      <left_joint>base_link_left_wheel</left_joint>
+      <right_joint>base_link_right_wheel</right_joint>
+      <wheel_separation>0.052</wheel_separation>
+      <wheel_radius>0.02</wheel_radius>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-pose-publisher-system"
+      name="gz::sim::systems::PosePublisher">
+      <publish_link_pose>false</publish_link_pose>
+      <publish_visual_pose>false</publish_visual_pose>
+      <publish_collision_pose>false</publish_collision_pose>
+      <publish_sensor_pose>false</publish_sensor_pose>
+      <publish_model_pose>true</publish_model_pose>
+      <publish_nested_model_pose>true</publish_nested_model_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+      <update_frequency>60</update_frequency>
+      <static_publisher>false</static_publisher>
+      <static_update_frequency>60</static_update_frequency>
+    </plugin>
+
     <link name='base_link'>
 
       <pose>0 0 0 0 0 0</pose>
 
+
       <!-- Sensors -->
-      <sensor name='prox0' type='gpu_lidar'>
+      <!-- <sensor name='prox0' type='gpu_lidar'>
         <always_on>true</always_on>
         <update_rate>100.00</update_rate>
         <visualize>true</visualize>
@@ -319,7 +350,7 @@
             <stddev>0.001</stddev>
           </noise>
         </lidar>
-      </sensor>
+      </sensor> -->
 
       <sensor name='imu' type='imu'>
         <always_on>true</always_on>
@@ -682,13 +713,15 @@
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='base_link_prox0' attached_to='base_link'>
-      <pose>0.032254999999999999 -0.010751999999999999 0.033000000000000002 1.5708070000000001 0 -0.30080000000000001</pose>
+      <pose>0.032254999999999999 -0.010751999999999999 0.033000000000000002 1.5708070000000001 0
+        -0.30080000000000001</pose>
     </frame>
     <frame name='prox0' attached_to='base_link_prox0'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='base_link_prox1' attached_to='base_link'>
-      <pose>0.022460999999999998 -0.025524000000000002 0.033000000000000002 1.5708060000000001 4.9999999999425673e-06 -0.80079999999999996</pose>
+      <pose>0.022460999999999998 -0.025524000000000002 0.033000000000000002 1.5708060000000001
+        4.9999999999425673e-06 -0.80079999999999996</pose>
     </frame>
     <frame name='prox1' attached_to='base_link_prox1'>
       <pose>0 0 0 0 0 0</pose>
@@ -700,31 +733,36 @@
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='base_link_prox3' attached_to='base_link'>
-      <pose>-0.030411000000000001 -0.015205 0.033000000000000002 1.5707880000000001 7.0000000000364113e-06 -2.6439859999999999</pose>
+      <pose>-0.030411000000000001 -0.015205 0.033000000000000002 1.5707880000000001
+        7.0000000000364113e-06 -2.6439859999999999</pose>
     </frame>
     <frame name='prox3' attached_to='base_link_prox3'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='base_link_prox4' attached_to='base_link'>
-      <pose>-0.030411000000000001 0.015205 0.033000000000000002 1.5707869999999999 -3.0000000000352557e-06 2.6392000000000002</pose>
+      <pose>-0.030411000000000001 0.015205 0.033000000000000002 1.5707869999999999
+        -3.0000000000352557e-06 2.6392000000000002</pose>
     </frame>
     <frame name='prox4' attached_to='base_link_prox4'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='base_link_prox5' attached_to='base_link'>
-      <pose>0 0.034000000000000002 0.033000000000000002 1.5707929999999999 -1.1000000000427123e-05 1.5707899999999999</pose>
+      <pose>0 0.034000000000000002 0.033000000000000002 1.5707929999999999 -1.1000000000427123e-05
+        1.5707899999999999</pose>
     </frame>
     <frame name='prox5' attached_to='base_link_prox5'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='base_link_prox6' attached_to='base_link'>
-      <pose>0.022460999999999998 0.025524000000000002 0.033000000000000002 1.5708009999999999 -9.9999999999546236e-06 0.79920000000000002</pose>
+      <pose>0.022460999999999998 0.025524000000000002 0.033000000000000002 1.5708009999999999
+        -9.9999999999546236e-06 0.79920000000000002</pose>
     </frame>
     <frame name='prox6' attached_to='base_link_prox6'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='base_link_prox7' attached_to='base_link'>
-      <pose>0.032254999999999999 0.010751999999999999 0.033000000000000002 1.5708059999999999 -6.9999999999809001e-06 0.29920000000000024</pose>
+      <pose>0.032254999999999999 0.010751999999999999 0.033000000000000002 1.5708059999999999
+        -6.9999999999809001e-06 0.29920000000000024</pose>
     </frame>
     <frame name='prox7' attached_to='base_link_prox7'>
       <pose>0 0 0 0 0 0</pose>
@@ -742,7 +780,8 @@
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='base_link_tof' attached_to='base_link'>
-      <pose>0.034000000000000002 -0.0018 0.033000000000000002 1.5708070000000001 -3.9999999999998135e-06 -0.00080000000000000004</pose>
+      <pose>0.034000000000000002 -0.0018 0.033000000000000002 1.5708070000000001
+        -3.9999999999998135e-06 -0.00080000000000000004</pose>
     </frame>
     <frame name='tof' attached_to='base_link_tof'>
       <pose>0 0 0 0 0 0</pose>

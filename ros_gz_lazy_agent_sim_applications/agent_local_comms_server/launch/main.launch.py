@@ -19,14 +19,15 @@ from launch_ros.substitutions import FindPackageShare
 
 
 launch_configuration = {
-    'epuck_implementation': 'epuck_driver_cpp',
+    # 'epuck_implementation': 'epuck_driver_cpp',
     # 'epuck_implementation': 'gz_model_py',
-    # 'epuck_implementation': 'gz_model_headless_py',
+    'epuck_implementation': 'gz_model_headless_py',
     'comms_manager_implementation': 'central_node_py',
-    'agent_comms_implementation': 'epuck_firmware',
+    # 'agent_comms_implementation': 'epuck_firmware',
     # 'agent_comms_implementation': 'udp_cpp',
     # 'agent_comms_implementation': 'udp_py',
-    # 'agent_comms_implementation': 'gz_rf_py',
+    'agent_comms_implementation': 'gz_rf_py',
+    'localisation_implementation': 'gz_localisation',
     'waypoint_controller_implementation': 'waypoint_controller_py',
     'manager_server_host': '192.168.0.2',
     'manager_server_port': 50000,
@@ -35,50 +36,50 @@ launch_configuration = {
     'manager_robot_tf_suffix': '',
     'manager_robot_tf_frame': '/base_link',
     'agents': [
-        {
-            'robot_id': 5731,
-            'robot_epuck_host': '192.168.0.21',
-            'robot_epuck_port': 1000,
-            'robot_comms_host': '192.168.0.21',
-            'robot_comms_request_port': 1001,
-            'robot_knowledge_host': '192.168.0.21',
-            'robot_knowledge_exchange_port': 1002,
-            'robot_xpos': -0.1,
-            'robot_ypos': -0.1,
-            'robot_theta': 0.0,
-            'robot_teleop': True,
-        },
-        {
-            'robot_id': 5831,
-            'robot_epuck_host': '192.168.0.22',
-            'robot_epuck_port': 1000,
-            'robot_comms_host': '192.168.0.22',
-            'robot_comms_request_port': 1001,
-            'robot_knowledge_host': '192.168.0.22',
-            'robot_knowledge_exchange_port': 1002,
-            'robot_xpos': -0.1,
-            'robot_ypos': 0.1,
-            'robot_theta': 0.0,
-            'robot_teleop': False,
-        },
         # {
-        #     'robot_id': 0,
-        #     'robot_epuck_host': '127.0.0.1',
-        #     'robot_epuck_port': 10000,
-        #     'robot_comms_host': '127.0.0.1',
-        #     'robot_comms_request_port': 50002,
-        #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:00',
-        #     'robot_knowledge_exchange_port': 50003,
+        #     'robot_id': 5731,
+        #     'robot_epuck_host': '192.168.0.21',
+        #     'robot_epuck_port': 1000,
+        #     'robot_comms_host': '192.168.0.21',
+        #     'robot_comms_request_port': 1001,
+        #     'robot_knowledge_host': '192.168.0.21',
+        #     'robot_knowledge_exchange_port': 1002,
         #     'robot_xpos': -0.1,
         #     'robot_ypos': -0.1,
         #     'robot_theta': 0.0,
         #     'robot_teleop': True,
         # },
         # {
+        #     'robot_id': 5831,
+        #     'robot_epuck_host': '192.168.0.22',
+        #     'robot_epuck_port': 1000,
+        #     'robot_comms_host': '192.168.0.22',
+        #     'robot_comms_request_port': 1001,
+        #     'robot_knowledge_host': '192.168.0.22',
+        #     'robot_knowledge_exchange_port': 1002,
+        #     'robot_xpos': -0.1,
+        #     'robot_ypos': 0.1,
+        #     'robot_theta': 0.0,
+        #     'robot_teleop': False,
+        # },
+        {
+            'robot_id': 0,
+            'robot_epuck_host': '192.168.0.2',
+            'robot_epuck_port': 10000,
+            'robot_comms_host': '192.168.0.2',
+            'robot_comms_request_port': 50002,
+            'robot_knowledge_host': 'aa:bb:cc:dd:ee:00',
+            'robot_knowledge_exchange_port': 50003,
+            'robot_xpos': -0.1,
+            'robot_ypos': -0.1,
+            'robot_theta': 0.0,
+            'robot_teleop': True,
+        },
+        # {
         #     'robot_id': 1,
-        #     'robot_epuck_host': '127.0.0.1',
+        #     'robot_epuck_host': '192.168.0.2',
         #     'robot_epuck_port': 10001,
-        #     'robot_comms_host': '127.0.0.1',
+        #     'robot_comms_host': '192.168.0.2',
         #     'robot_comms_request_port': 50004,
         #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:01',
         #     'robot_knowledge_exchange_port': 50005,
@@ -89,9 +90,9 @@ launch_configuration = {
         # },
         # {
         #     'robot_id': 2,
-        #     'robot_epuck_host': '127.0.0.1',
+        #     'robot_epuck_host': '192.168.0.2',
         #     'robot_epuck_port': 10002,
-        #     'robot_comms_host': '127.0.0.1',
+        #     'robot_comms_host': '192.168.0.2',
         #     'robot_comms_request_port': 50006,
         #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:02',
         #     'robot_knowledge_exchange_port': 50007,
@@ -102,9 +103,9 @@ launch_configuration = {
         # },
         # {
         #     'robot_id': 3,
-        #     'robot_epuck_host': '127.0.0.1',
+        #     'robot_epuck_host': '192.168.0.2',
         #     'robot_epuck_port': 10003,
-        #     'robot_comms_host': '127.0.0.1',
+        #     'robot_comms_host': '192.168.0.2',
         #     'robot_comms_request_port': 50008,
         #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:03',
         #     'robot_knowledge_exchange_port': 50009,
@@ -175,6 +176,12 @@ implementations = {
             'launchfile': 'gz_agent.launch.py',
         },
     },
+    'localisation_implementation': {
+        'gz_localisation': {
+            'package': 'localisation_bringup',
+            'launchfile': 'main.launch.py',
+        }
+    },
     'waypoint_controller_implementation': {
         'waypoint_controller_py': {
             'package': 'waypoint_controller',
@@ -244,21 +251,6 @@ def include_epuck_implementation() -> list[launch.Action]:
         )
 
         result.append(_rviz)
-
-    _static_tf_pub = launch_ros.actions.Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_transform_publisher',
-        output='screen',
-        arguments=[
-            '--frame-id',
-            'world',
-            '--child-frame-id',
-            'odom',
-        ],
-    )
-
-    result.append(_static_tf_pub)
 
     nodes = []
 
@@ -375,7 +367,7 @@ def include_comms_manager_implementation() -> list[launch.Action]:
             **{
                 f'remap_ids/{i}': f"{agent['robot_id']}"
                 for i, agent in enumerate(launch_configuration['agents'])
-                },
+            },
         }.items(),
     )
 
@@ -430,6 +422,51 @@ def include_agent_comms_implementations() -> list[launch.Action]:
                     f"{agent['robot_knowledge_host']}",
                 'robot_knowledge_exchange_port':
                     f"{agent['robot_knowledge_exchange_port']}",
+            }.items(),
+        )
+
+        result.append(_include)
+
+    return result
+
+
+def include_localisation_implementation() -> list[launch.Action]:
+    """Include the localisation implementation."""
+    result = []
+
+    launchfile = get_implementation_value(
+        'localisation_implementation',
+        'launchfile',
+    )
+
+    if not launchfile:
+        return result
+
+    for i, agent in enumerate(launch_configuration['agents']):
+        _include = IncludeLaunch(
+            PythonLaunch(
+                PathJoin(
+                    [
+                        FindPackageShare(
+                            get_implementation_value(
+                                'localisation_implementation',
+                                'package',
+                            ),
+                        ),
+                        'launch',
+                        get_implementation_value(
+                            'localisation_implementation',
+                            'launchfile',
+                        ),
+                    ]
+                )
+            ),
+            launch_arguments={
+                'id': f'{i}',
+                'robot_tf_prefix':
+                    f"{launch_configuration['manager_robot_tf_prefix']}",
+                'robot_tf_suffix':
+                    f"{launch_configuration['manager_robot_tf_suffix']}",
             }.items(),
         )
 
@@ -574,10 +611,11 @@ def launch_teleop() -> list[launch.Action]:
 def generate_launch_description():
     """Generate the main launch description."""
     actions = include_epuck_implementation() + \
-        include_comms_manager_implementation() + \
-        include_agent_comms_implementations() + \
-        include_waypoint_controller_implementation() + \
+        include_localisation_implementation() + \
         launch_teleop()
+    # include_comms_manager_implementation() + \
+    # include_agent_comms_implementations() + \
+    # include_waypoint_controller_implementation() + \
 
     ld = launch.LaunchDescription(
         actions
