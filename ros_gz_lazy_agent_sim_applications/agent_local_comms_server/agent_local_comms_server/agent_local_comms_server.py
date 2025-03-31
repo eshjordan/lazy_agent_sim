@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import math
+import select
 import socket
 import struct
 from typing import override
@@ -281,19 +282,37 @@ class LocalCommsManager(rclpy.node.Node):
                 known_ids=[],
             ).pack()
 
+            self.get_logger().debug('Knowledge packet packed')
+
             self.knowledge_request_client.sendto(
                 request,
                 (robot_comms_host, robot_comms_request_port),
             )
 
+            self.get_logger().debug('Knowledge packet sent')
+
+            # Wait for response
+            ready_to_read, _, _ = select.select(
+                [self.knowledge_request_client], [], [], 1.0
+            )
+
+            if not ready_to_read or len(ready_to_read) == 0:
+                self.get_logger().warning(
+                    f"Timeout waiting for knowledge request response from {robot_id}"
+                )
+                continue
+
             data, retaddr = self.knowledge_request_client.recvfrom(
                 EpuckKnowledgePacket.calcsize()
             )
+
+            self.get_logger().debug('Knowledge packet received')
+
             if len(data) == 0:
-                self.robot_model.logger.warning(
-                    f"({self.neighbour.host}:{self.neighbour.port}) disconnected"
+                self.get_logger().warning(
+                    f"Received empty knowledge request response from {robot_id}"
                 )
-                break
+                continue
 
             response = EpuckKnowledgePacket.unpack(data)
             self.get_logger().debug(

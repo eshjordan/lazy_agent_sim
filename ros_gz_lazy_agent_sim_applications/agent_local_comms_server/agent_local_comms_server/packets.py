@@ -1,6 +1,8 @@
 import struct
 from dataclasses import dataclass
 
+import rclpy
+
 ENDIAN_FMT = "<"
 
 MAX_ROBOTS = 10
@@ -157,9 +159,9 @@ class Centroid:
         return struct.calcsize(CENTROID_FMT_STR)
 
 
-BOUNDARY_X_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_X_POINTS}f'
-BOUNDARY_Y_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_Y_POINTS}f'
-BOUNDARY_Z_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_Z_POINTS}f'
+BOUNDARY_X_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_X_POINTS}f' if MAX_BOUNDARY_X_POINTS > 0 else '1B'
+BOUNDARY_Y_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_Y_POINTS}f' if MAX_BOUNDARY_Y_POINTS > 0 else '1B'
+BOUNDARY_Z_POINTS_FMT_STR: str = f'{MAX_BOUNDARY_Z_POINTS}f' if MAX_BOUNDARY_Z_POINTS > 0 else '1B'
 BOUNDARY_FMT_STR: str = (
     ENDIAN_FMT
     + f'{BOUNDARY_X_POINTS_FMT_STR}{BOUNDARY_Y_POINTS_FMT_STR}{BOUNDARY_Z_POINTS_FMT_STR}'
@@ -173,14 +175,14 @@ class Boundary:
     z_points: list[float]
 
     def pack(self):
-        padded_x_points = self.x_points + [0.0] * (
-            MAX_BOUNDARY_X_POINTS - len(self.x_points)
+        padded_x_points = self.x_points + [0] * (
+            max(MAX_BOUNDARY_X_POINTS, 1) - len(self.x_points)
         )
-        padded_y_points = self.y_points + [0.0] * (
-            MAX_BOUNDARY_Y_POINTS - len(self.y_points)
+        padded_y_points = self.y_points + [0] * (
+            max(MAX_BOUNDARY_Y_POINTS) - len(self.y_points)
         )
-        padded_z_points = self.z_points + [0.0] * (
-            MAX_BOUNDARY_Z_POINTS - len(self.z_points)
+        padded_z_points = self.z_points + [0] * (
+            max(MAX_BOUNDARY_Z_POINTS) - len(self.z_points)
         )
         return struct.pack(
             BOUNDARY_FMT_STR,
@@ -300,13 +302,20 @@ class EpuckKnowledgePacket:
     N: int = 0x0  # byte
 
     def pack(self):
-        return struct.pack(
+        retval = struct.pack(
             EPUCK_KNOWLEDGE_PACKET_FMT_STR,
             self.id,
             self.robot_id,
             self.seq,
             self.N,
-        ) + b"".join([record.pack() for record in self.known_ids])
+        ) + b"".join([record.pack() for record in self.known_ids]) + b"\x00" * (
+            EpuckKnowledgeRecord.calcsize() * (MAX_ROBOTS - len(self.known_ids))
+        )
+        if len(retval) != self.calcsize():
+            rclpy.logging.get_logger("agent_local_comms_server").error(
+                f"Packed size {len(retval)} != expected size {self.calcsize()}"
+            )
+        return retval
 
     @classmethod
     def unpack(cls, buffer: bytes):
