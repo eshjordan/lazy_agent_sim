@@ -424,8 +424,7 @@ def include_waypoint_controller_implementation() -> list[launch.Action]:
             }.items(),
         )
 
-
-    result.append(_include)
+        result.append(_include)
 
 
     return result
