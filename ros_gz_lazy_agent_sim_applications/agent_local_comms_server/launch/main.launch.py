@@ -386,58 +386,49 @@ def include_comms_manager_implementation() -> list[launch.Action]:
 
     return result
 
+
 def include_waypoint_controller_implementation() -> list[launch.Action]:
     """Include the waypoint controller implementation."""
     result = []
 
-
-    _include = IncludeLaunch(
-        PythonLaunch(
-            PathJoin(
-                [
-                    FindPackageShare(
+    for i, agent in enumerate(launch_configuration['agents']):
+        _include = IncludeLaunch(
+            PythonLaunch(
+                PathJoin(
+                    [
+                        FindPackageShare(
+                            get_implementation_value(
+                                'waypoint_controller_implementation',
+                                'package',
+                            ),
+                        ),
+                        'launch',
                         get_implementation_value(
                             'waypoint_controller_implementation',
-                            'package',
+                            'launchfile',
                         ),
-                    ),
-                    'launch',
-                    get_implementation_value(
-                        'waypoint_controller_implementation',
-                        'launchfile',
-                    ),
-                ]
-            )
-        ),
-        launch_arguments={
-            'server_host':
-                f"{launch_configuration['manager_server_host']}",
-            'server_port':
-                f"{launch_configuration['manager_server_port']}",
-            'threshold_dist':
-                f"{launch_configuration['manager_threshold_dist']}",
-            'robot_tf_prefix':
-                f"{launch_configuration['manager_robot_tf_prefix']}",
-            'robot_tf_suffix':
-                f"{launch_configuration['manager_robot_tf_suffix']}",
-            'robot_tf_frame':
-                f"{launch_configuration['manager_robot_tf_frame']}",
-            **{
-                f'remap_ids/{i}': f"{agent['robot_id']}"
-                for i, agent in enumerate(launch_configuration['agents'])
-                },
-        }.items(),
-    )
+                    ]
+                )
+            ),
+            launch_arguments={
+                'namespace':
+                    f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
+                'robot_id':
+                    f"{agent['robot_id']}",
+                'robot_tf_prefix':
+                    f"{launch_configuration['manager_robot_tf_prefix']}",
+                'robot_tf_suffix':
+                    f"{launch_configuration['manager_robot_tf_suffix']}",
+                'robot_tf_frame':
+                    f"{launch_configuration['manager_robot_tf_frame']}",
+            }.items(),
+        )
 
 
     result.append(_include)
 
 
     return result
-
-
-
-
 
 
 def include_agent_comms_implementations() -> list[launch.Action]:
@@ -553,8 +544,8 @@ def generate_launch_description():
     actions = include_epuck_implementation() + \
         include_comms_manager_implementation() + \
         include_agent_comms_implementations() + \
-        launch_teleop() + \
-        include_waypoint_controller_implementation()
+        include_waypoint_controller_implementation() + \
+        launch_teleop()
 
     ld = launch.LaunchDescription(
         actions
