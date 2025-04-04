@@ -24,23 +24,26 @@ launch_configuration = {
     # 'epuck_implementation': 'gz_model_headless_py',
     'comms_manager_implementation': 'central_node_py',
     'agent_comms_implementation': 'epuck_firmware',
+    #### added here
+    'waypoint_controller_implementation': 'controller_node_py', #added for waypoint controller
+    ########
     # 'agent_comms_implementation': 'udp_cpp',
     # 'agent_comms_implementation': 'udp_py',
     # 'agent_comms_implementation': 'gz_rf_py',
-    'manager_server_host': '192.168.0.2',
+    'manager_server_host': '192.168.11.5',
     'manager_server_port': 50000,
-    'manager_threshold_dist': 0.1,
+    'manager_threshold_dist': 0.3,
     'manager_robot_tf_prefix': 'epuck2_robot_',
     'manager_robot_tf_suffix': '',
     'manager_robot_tf_frame': '/base_link',
     'agents': [
         {
-            'robot_id': 5731,
-            'robot_epuck_host': '192.168.0.21',
+            'robot_id': 5785,
+            'robot_epuck_host': '192.168.11.11',
             'robot_epuck_port': 1000,
-            'robot_comms_host': '192.168.0.21',
+            'robot_comms_host': '192.168.11.11',
             'robot_comms_request_port': 1001,
-            'robot_knowledge_host': '192.168.0.21',
+            'robot_knowledge_host': '192.168.11.11',
             'robot_knowledge_exchange_port': 1002,
             'robot_xpos': -0.1,
             'robot_ypos': -0.1,
@@ -48,17 +51,17 @@ launch_configuration = {
             'robot_teleop': True,
         },
         {
-            'robot_id': 5831,
-            'robot_epuck_host': '192.168.0.22',
+            'robot_id': 5653,
+            'robot_epuck_host': '192.168.11.12',
             'robot_epuck_port': 1000,
-            'robot_comms_host': '192.168.0.22',
+            'robot_comms_host': '192.168.11.12',
             'robot_comms_request_port': 1001,
-            'robot_knowledge_host': '192.168.0.22',
+            'robot_knowledge_host': '192.168.11.12',
             'robot_knowledge_exchange_port': 1002,
             'robot_xpos': -0.1,
             'robot_ypos': 0.1,
             'robot_theta': 0.0,
-            'robot_teleop': False,
+            'robot_teleop': True,
         },
         # {
         #     'robot_id': 0,
@@ -158,6 +161,13 @@ implementations = {
             'launchfile': 'agent_local_comms_server.launch.py',
         },
     },
+    'waypoint_controller_implementation': {
+        'controller_node_py': {
+            'package': 'waypoint_controller',
+            'launchfile': 'waypoint_controller_test.launch.py',
+        },
+    },
+
     'agent_comms_implementation': {
         'epuck_firmware': {
         },
@@ -376,6 +386,59 @@ def include_comms_manager_implementation() -> list[launch.Action]:
 
     return result
 
+def include_waypoint_controller_implementation() -> list[launch.Action]:
+    """Include the waypoint controller implementation."""
+    result = []
+
+
+    _include = IncludeLaunch(
+        PythonLaunch(
+            PathJoin(
+                [
+                    FindPackageShare(
+                        get_implementation_value(
+                            'waypoint_controller_implementation',
+                            'package',
+                        ),
+                    ),
+                    'launch',
+                    get_implementation_value(
+                        'waypoint_controller_implementation',
+                        'launchfile',
+                    ),
+                ]
+            )
+        ),
+        launch_arguments={
+            'server_host':
+                f"{launch_configuration['manager_server_host']}",
+            'server_port':
+                f"{launch_configuration['manager_server_port']}",
+            'threshold_dist':
+                f"{launch_configuration['manager_threshold_dist']}",
+            'robot_tf_prefix':
+                f"{launch_configuration['manager_robot_tf_prefix']}",
+            'robot_tf_suffix':
+                f"{launch_configuration['manager_robot_tf_suffix']}",
+            'robot_tf_frame':
+                f"{launch_configuration['manager_robot_tf_frame']}",
+            **{
+                f'remap_ids/{i}': f"{agent['robot_id']}"
+                for i, agent in enumerate(launch_configuration['agents'])
+                },
+        }.items(),
+    )
+
+
+    result.append(_include)
+
+
+    return result
+
+
+
+
+
 
 def include_agent_comms_implementations() -> list[launch.Action]:
     """Include the agent comms implementations."""
@@ -490,7 +553,8 @@ def generate_launch_description():
     actions = include_epuck_implementation() + \
         include_comms_manager_implementation() + \
         include_agent_comms_implementations() + \
-        launch_teleop()
+        launch_teleop() + \
+        include_waypoint_controller_implementation()
 
     ld = launch.LaunchDescription(
         actions
