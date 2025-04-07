@@ -145,21 +145,13 @@ launch_configuration = {
         {
             'frame-id': 'earth',
             'child-frame-id': 'epuck2_robot_0',
+            'x': '-0.1',
+            'y': '-0.1',
         },
         {
-            'frame-id': 'epuck2_robot_0',
+            'frame-id': 'epuck2_robot_0/map',
             'child-frame-id': 'epuck2_robot_0/odom',
         },
-        # {
-        #     'frame-id': 'earth',
-        #     'child-frame-id': 'epuck2_robot_0/odom',
-        #     'x': '-0.1',
-        #     'y': '-0.1',
-        # },
-        # {
-        #     'frame-id': 'epuck2_robot_0/map',
-        #     'child-frame-id': 'epuck2_robot_0/odom',
-        # },
         {
             'frame-id': 'earth',
             'child-frame-id': 'epuck2_robot_1',
@@ -263,6 +255,16 @@ implementations = {
             'package': 'waypoint_controller',
             'launchfile': 'waypoint_controller_test.launch.py',
             'oneshot': False,
+            'extra_args': {
+                'min_linear_vel': '0.05',
+                'max_linear_vel': '0.1',
+                'min_angular_vel': '0.0',
+                'max_angular_vel': '1.0',
+                'slow_distance': '0.3',
+                'slow_angle': '0.3',
+                'threshold_distance': '0.05',
+                'threshold_angle': '0.05',
+            },
         },
     },
 }
@@ -336,7 +338,7 @@ def include_epuck_implementation() -> list[launch.Action]:
 
             launch_arguments = {
                 'namespace':
-                    f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
+                    f'/{launch_configuration["manager_robot_tf_prefix"]}{i}',
                 'epuck2_id': f"{agent['robot_id']}",
                 'epuck2_address': f"{agent['robot_epuck_host']}",
                 'epuck2_port': f"{agent['robot_epuck_port']}",
@@ -564,8 +566,29 @@ def include_waypoint_controller_implementation() -> list[launch.Action]:
     if not launchfile:
         return result
 
-    if not get_implementation_value('epuck_implementation', 'oneshot'):
+
+    extra_args = get_implementation_value(
+        'epuck_implementation',
+        'extra_args',
+    )
+
+    if not get_implementation_value('waypoint_controller_implementation', 'oneshot'):
         for i, agent in enumerate(launch_configuration['agents']):
+            launch_arguments={
+                'namespace':
+                    f'/{launch_configuration["manager_robot_tf_prefix"]}{i}',
+                'robot_id':
+                    f"{agent['robot_id']}",
+                'robot_tf_prefix':
+                    f"{launch_configuration['manager_robot_tf_prefix']}",
+                'robot_tf_suffix':
+                    f"{launch_configuration['manager_robot_tf_suffix']}",
+                'robot_tf_frame':
+                    f"{launch_configuration['manager_robot_tf_frame']}",
+            }
+
+            launch_arguments.update(extra_args if extra_args else {})
+
             _include = IncludeLaunch(
                 PythonLaunch(
                     PathJoin(
@@ -584,22 +607,24 @@ def include_waypoint_controller_implementation() -> list[launch.Action]:
                         ]
                     )
                 ),
-                launch_arguments={
-                    'namespace':
-                        f'{launch_configuration["manager_robot_tf_prefix"]}{i}',
-                    'robot_id':
-                        f"{agent['robot_id']}",
-                    'robot_tf_prefix':
-                        f"{launch_configuration['manager_robot_tf_prefix']}",
-                    'robot_tf_suffix':
-                        f"{launch_configuration['manager_robot_tf_suffix']}",
-                    'robot_tf_frame':
-                        f"{launch_configuration['manager_robot_tf_frame']}",
-                }.items(),
+                launch_arguments=launch_arguments.items(),
             )
 
             result.append(_include)
     else:
+        launch_arguments={
+            'namespace':
+                f'/{launch_configuration["manager_robot_tf_prefix"]}',
+            'robot_tf_prefix':
+                f"{launch_configuration['manager_robot_tf_prefix']}",
+            'robot_tf_suffix':
+                f"{launch_configuration['manager_robot_tf_suffix']}",
+            'robot_tf_frame':
+                f"{launch_configuration['manager_robot_tf_frame']}",
+        }
+
+        launch_arguments.update(extra_args if extra_args else {})
+
         _include = IncludeLaunch(
             PythonLaunch(
                 PathJoin(
@@ -618,16 +643,7 @@ def include_waypoint_controller_implementation() -> list[launch.Action]:
                     ]
                 )
             ),
-            launch_arguments={
-                'namespace':
-                    f'{launch_configuration["manager_robot_tf_prefix"]}',
-                'robot_tf_prefix':
-                    f"{launch_configuration['manager_robot_tf_prefix']}",
-                'robot_tf_suffix':
-                    f"{launch_configuration['manager_robot_tf_suffix']}",
-                'robot_tf_frame':
-                    f"{launch_configuration['manager_robot_tf_frame']}",
-            }.items(),
+            launch_arguments=launch_arguments.items(),
         )
 
         result.append(_include)

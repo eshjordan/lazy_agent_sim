@@ -9,6 +9,11 @@
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_0/pose"
+  gz_topic_name: "/model/epuck2_robot_0/pose"
+  ros_type_name: "geometry_msgs/msg/PoseStamped"
+  gz_type_name: "gz.msgs.Pose"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_0/odom"
   gz_topic_name: "/model/epuck2_robot_0/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
@@ -153,6 +158,11 @@
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_1/pose"
+  gz_topic_name: "/model/epuck2_robot_1/pose"
+  ros_type_name: "geometry_msgs/msg/PoseStamped"
+  gz_type_name: "gz.msgs.Pose"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_1/odom"
   gz_topic_name: "/model/epuck2_robot_1/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
@@ -292,6 +302,11 @@
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_2/pose"
+  gz_topic_name: "/model/epuck2_robot_2/pose"
+  ros_type_name: "geometry_msgs/msg/PoseStamped"
+  gz_type_name: "gz.msgs.Pose"
+  direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_2/odom"
   gz_topic_name: "/model/epuck2_robot_2/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
@@ -430,6 +445,11 @@
   gz_topic_name: "/clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
+  direction: GZ_TO_ROS
+- ros_topic_name: "/epuck2_robot_3/pose"
+  gz_topic_name: "/model/epuck2_robot_3/pose"
+  ros_type_name: "geometry_msgs/msg/PoseStamped"
+  gz_type_name: "gz.msgs.Pose"
   direction: GZ_TO_ROS
 - ros_topic_name: "/epuck2_robot_3/odom"
   gz_topic_name: "/model/epuck2_robot_3/odometry"
