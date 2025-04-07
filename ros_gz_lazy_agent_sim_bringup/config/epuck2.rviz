@@ -480,7 +480,7 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: RobotModel
-          TF Prefix: epuck2_robot_0/base_link
+          TF Prefix: epuck2_robot_0
           Update Interval: 0
           Value: true
           Visual Enabled: true
@@ -1090,7 +1090,7 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: RobotModel
-          TF Prefix: epuck2_robot_1/base_link
+          TF Prefix: epuck2_robot_1
           Update Interval: 0
           Value: true
           Visual Enabled: true
@@ -1575,7 +1575,7 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: RobotModel
-          TF Prefix: epuck2_robot_2/base_link
+          TF Prefix: epuck2_robot_2
           Update Interval: 0
           Value: true
           Visual Enabled: true
@@ -2060,7 +2060,7 @@ Visualization Manager:
             Inertia: false
             Mass: false
           Name: RobotModel
-          TF Prefix: epuck2_robot_3/base_link
+          TF Prefix: epuck2_robot_3
           Update Interval: 0
           Value: true
           Visual Enabled: true
@@ -2252,7 +2252,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: arena
+    Fixed Frame: earth
     Frame Rate: 30
   Name: root
   Tools:

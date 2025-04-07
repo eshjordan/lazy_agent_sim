@@ -179,10 +179,10 @@ class Boundary:
             max(MAX_BOUNDARY_X_POINTS, 1) - len(self.x_points)
         )
         padded_y_points = self.y_points + [0] * (
-            max(MAX_BOUNDARY_Y_POINTS) - len(self.y_points)
+            max(MAX_BOUNDARY_Y_POINTS, 1) - len(self.y_points)
         )
         padded_z_points = self.z_points + [0] * (
-            max(MAX_BOUNDARY_Z_POINTS) - len(self.z_points)
+            max(MAX_BOUNDARY_Z_POINTS, 1) - len(self.z_points)
         )
         return struct.pack(
             BOUNDARY_FMT_STR,

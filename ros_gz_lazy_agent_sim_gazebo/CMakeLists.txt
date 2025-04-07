@@ -41,22 +41,22 @@ elseif("${GZ_VERSION}" STREQUAL "ionic")
 endif()
 
 
-ament_auto_add_library(BasicSystem SHARED
-  src/BasicSystem.cc
-)
+# ament_auto_add_library(BasicSystem SHARED
+#   src/BasicSystem.cc
+# )
 
-target_link_libraries(BasicSystem
-  gz-sim
-)
+# target_link_libraries(BasicSystem
+#   gz-sim
+# )
 
 
-ament_auto_add_library(FullSystem SHARED
-  src/FullSystem.cc
-)
+# ament_auto_add_library(FullSystem SHARED
+#   src/FullSystem.cc
+# )
 
-target_link_libraries(FullSystem
-  gz-sim
-)
+# target_link_libraries(FullSystem
+#   gz-sim
+# )
 
 # Following directives are used when testing.
 if(BUILD_TESTING)

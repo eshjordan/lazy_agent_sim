@@ -18,9 +18,9 @@ import os
 from launch import LaunchDescription
 import launch
 from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, GroupAction
 import launch_ros
-from launch_ros.actions import ComposableNodeContainer
+from launch_ros.actions import ComposableNodeContainer, PushRosNamespace
 from launch_ros.descriptions import ComposableNode
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -52,7 +52,6 @@ def generate_launch_description():
                 "gui": "true",
                 "manager_robot_tf_prefix": "epuck2_robot_",
                 "manager_robot_tf_suffix": "",
-                "manager_robot_tf_frame": "/base_link",
             }.items(),
         )
     ) + [
@@ -119,117 +118,56 @@ def generate_launch_description():
             parameter_bridge,
             gz_server,
         ],
+        ros_arguments=['--disable-stdout-logs'],
     )
 
     frame_publishers = []
 
     for i in range(4):
-        robot_description = launch_ros.actions.Node(
-            namespace=[*get_namespace(i)],
-            package="robot_state_publisher",
-            executable="robot_state_publisher",
-            name=f"epuck_state_publisher_{i}",
-            parameters=[
-                {"use_sim_time": True},
-                {
-                    "frame_prefix": [
-                        *get_namespace(i),
-                        launch.substitutions.LaunchConfiguration(
-                            "manager_robot_tf_frame"
+        group = GroupAction([
+            PushRosNamespace(f'epuck2_robot_{i}'),
+            launch_ros.actions.Node(
+                package="robot_state_publisher",
+                executable="robot_state_publisher",
+                parameters=[
+                    {"use_sim_time": True},
+                    {
+                        "frame_prefix": [
+                            *get_namespace(i),
+                            "/",
+                        ],
+                        "publish_frequency": 60.0,
+                        "robot_description": FileContent(
+                            [
+                                PathJoinSubstitution(
+                                    [
+                                        FindPackageShare(
+                                            "ros_gz_lazy_agent_sim_description"
+                                        ),
+                                        "models",
+                                        "epuck2",
+                                        "epuck2.urdf",
+                                    ]
+                                ),
+                            ]
                         ),
-                        "/",
-                    ],
-                    "publish_frequency": 60.0,
-                    "robot_description": FileContent(
-                        [
-                            PathJoinSubstitution(
-                                [
-                                    FindPackageShare(
-                                        "ros_gz_lazy_agent_sim_description"
-                                    ),
-                                    "models",
-                                    "epuck2",
-                                    "epuck2.urdf",
-                                ]
-                            ),
-                        ]
-                    ),
-                },
-            ],
-        )
+                    },
+                ],
+            ),
+            launch_ros.actions.Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='static_transform_publisher',
+                arguments=[
+                    '--frame-id',
+                    [*get_namespace(i),],
+                    '--child-frame-id',
+                    [*get_namespace(i), '/map'],
+                ],
+            )
+        ])
 
-        frame_publishers.append(robot_description)
-
-        base_link_tf = launch_ros.actions.Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            name="static_transform_publisher",
-            output="screen",
-            arguments=[
-                "--frame-id",
-                (
-                    *get_namespace(i),
-                    launch.substitutions.LaunchConfiguration(
-                        "manager_robot_tf_frame"),
-                ),
-                "--child-frame-id",
-                (
-                    *get_namespace(i),
-                    launch.substitutions.LaunchConfiguration(
-                        "manager_robot_tf_frame"),
-                    launch.substitutions.LaunchConfiguration(
-                        "manager_robot_tf_frame"),
-                ),
-            ],
-        )
-
-        frame_publishers.append(base_link_tf)
-
-        left_wheel_tf = launch_ros.actions.Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            name="static_transform_publisher",
-            output="screen",
-            arguments=[
-                "--frame-id",
-                (
-                    *get_namespace(i),
-                    "/left_wheel",
-                ),
-                "--child-frame-id",
-                (
-                    *get_namespace(i),
-                    launch.substitutions.LaunchConfiguration(
-                        "manager_robot_tf_frame"),
-                    "/left_wheel",
-                ),
-            ],
-        )
-
-        frame_publishers.append(left_wheel_tf)
-
-        right_wheel_tf = launch_ros.actions.Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            name="static_transform_publisher",
-            output="screen",
-            arguments=[
-                "--frame-id",
-                (
-                    *get_namespace(i),
-                    "/right_wheel",
-                ),
-                "--child-frame-id",
-                (
-                    *get_namespace(i),
-                    launch.substitutions.LaunchConfiguration(
-                        "manager_robot_tf_frame"),
-                    "/right_wheel",
-                ),
-            ],
-        )
-
-        frame_publishers.append(right_wheel_tf)
+        frame_publishers.append(group)
 
     return LaunchDescription(
         launch_args
