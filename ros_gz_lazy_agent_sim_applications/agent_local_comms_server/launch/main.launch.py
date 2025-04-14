@@ -31,24 +31,24 @@ launch_configuration = {
     # 'agent_comms_implementation': 'gz_rf_py',
     'manager_server_host': '192.168.11.5',
     'manager_server_port': 50000,
-    'manager_threshold_dist': 0.1,
+    'manager_threshold_dist': 0.3,
     'manager_robot_tf_prefix': 'epuck2_robot_',
     'manager_robot_tf_suffix': '',
     'manager_robot_tf_frame': '/base_link',
     'agents': [
-        # {
-        #     'robot_id': 5785,
-        #     'robot_epuck_host': '192.168.11.11',
-        #     'robot_epuck_port': 1000,
-        #     'robot_comms_host': '192.168.11.11',
-        #     'robot_comms_request_port': 1001,
-        #     'robot_knowledge_host': '192.168.11.11',
-        #     'robot_knowledge_exchange_port': 1002,
-        #     'robot_xpos': -0.1,
-        #     'robot_ypos': -0.1,
-        #     'robot_theta': 0.0,
-        #     'robot_teleop': True,
-        # },
+        {
+            'robot_id': 5785,
+            'robot_epuck_host': '192.168.11.11',
+            'robot_epuck_port': 1000,
+            'robot_comms_host': '192.168.11.11',
+            'robot_comms_request_port': 1001,
+            'robot_knowledge_host': '192.168.11.11',
+            'robot_knowledge_exchange_port': 1002,
+            'robot_xpos': -0.1,
+            'robot_ypos': -0.1,
+            'robot_theta': 0.0,
+            'robot_teleop': True,
+        },
         {
             'robot_id': 5653,
             'robot_epuck_host': '192.168.11.12',
@@ -750,7 +750,32 @@ def generate_launch_description():
         launch_teleop()
 
     ld = launch.LaunchDescription(
-        actions
+        actions + [
+            launch_ros.actions.Node(
+                executable='pose_tf',
+                package='agent_local_comms_server',
+                parameters=[
+                    {
+                        'topic_name': '/vrpn_mocap/BW_epuck0/pose',
+                        'frame_id': 'earth',
+                        'child_frame_id': 'epuck2_robot_0/base_link',
+                    }
+                ]
+            ),
+            launch_ros.actions.Node(
+                executable='pose_tf',
+                package='agent_local_comms_server',
+                parameters=[
+                    {
+                        'topic_name': '/vrpn_mocap/BW_epuck1/pose',
+                        'frame_id': 'earth',
+                        'child_frame_id': 'epuck2_robot_1/base_link',
+                    }
+                ]
+            ),
+            # ros2 launch vrpn_mocap client.launch.yaml server:=192.168.11.3 port:=3883
+            # sudo pkill -f static_transform_publisher ; sudo pkill -f controller ; sudo pkill -f agent_local_comms_server
+        ]
     )
 
     # breakpoint()

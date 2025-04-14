@@ -28,6 +28,7 @@ setup(
             "agent_local_comms_server = agent_local_comms_server.agent_local_comms_server:main",
             "udp_agent_comms = agent_local_comms_server.udp_agent_comms:main",
             "gz_agent_comms = agent_local_comms_server.gz_agent_comms:main",
+            "pose_tf = agent_local_comms_server.pose_tf:main"
         ],
     },
 )
