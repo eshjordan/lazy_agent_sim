@@ -48,6 +48,7 @@ launch_configuration = {
             'robot_ypos': -0.1,
             'robot_theta': 0.0,
             'robot_teleop': True,
+            'robot_angular_offset': -2.360,
         },
         {
             'robot_id': 5653,
@@ -61,6 +62,7 @@ launch_configuration = {
             'robot_ypos': 0.1,
             'robot_theta': 0.0,
             'robot_teleop': True,
+            'robot_angular_offset': -2.360,
         },
         # {
         #     'robot_id': 5731,
@@ -74,6 +76,7 @@ launch_configuration = {
         #     'robot_ypos': -0.1,
         #     'robot_theta': 0.0,
         #     'robot_teleop': True,
+        #     'robot_angular_offset': -2.360,
         # },
         # {
         #     'robot_id': 5831,
@@ -87,6 +90,7 @@ launch_configuration = {
         #     'robot_ypos': 0.1,
         #     'robot_theta': 0.0,
         #     'robot_teleop': False,
+        #     'robot_angular_offset': -2.360,
         # },
         # {
         #     'robot_id': 0,
@@ -100,6 +104,7 @@ launch_configuration = {
         #     'robot_ypos': -0.1,
         #     'robot_theta': 0.0,
         #     'robot_teleop': True,
+        #     'robot_angular_offset': 0.0,
         # },
         # {
         #     'robot_id': 1,
@@ -113,6 +118,7 @@ launch_configuration = {
         #     'robot_ypos': 0.1,
         #     'robot_theta': 0.0,
         #     'robot_teleop': False,
+        #     'robot_angular_offset': 0.0,
         # },
         # {
         #     'robot_id': 2,
@@ -126,6 +132,7 @@ launch_configuration = {
         #     'robot_ypos': -0.1,
         #     'robot_theta': 0.0,
         #     'robot_teleop': False,
+        #     'robot_angular_offset': 0.0,
         # },
         # {
         #     'robot_id': 3,
@@ -139,6 +146,7 @@ launch_configuration = {
         #     'robot_ypos': 0.1,
         #     'robot_theta': 0.0,
         #     'robot_teleop': False,
+        #     'robot_angular_offset': 0.0,
         # },
     ],
     'static_transforms': [
@@ -447,8 +455,7 @@ def include_comms_manager_implementation() -> list[launch.Action]:
                 f"{launch_configuration['manager_robot_tf_frame']}",
             **{
                 f'remap_ids/{i}': f"{agent['robot_id']}"
-                for i, agent in enumerate(launch_configuration['agents'])
-            },
+                for i, agent in enumerate(launch_configuration['agents'])},
         }.items(),
     )
 
@@ -569,7 +576,6 @@ def include_waypoint_controller_implementation() -> list[launch.Action]:
     if not launchfile:
         return result
 
-
     extra_args = get_implementation_value(
         'epuck_implementation',
         'extra_args',
@@ -577,7 +583,7 @@ def include_waypoint_controller_implementation() -> list[launch.Action]:
 
     if not get_implementation_value('waypoint_controller_implementation', 'oneshot'):
         for i, agent in enumerate(launch_configuration['agents']):
-            launch_arguments={
+            launch_arguments = {
                 'namespace':
                     f'/{launch_configuration["manager_robot_tf_prefix"]}{i}',
                 'robot_id':
@@ -596,6 +602,7 @@ def include_waypoint_controller_implementation() -> list[launch.Action]:
                 'slow_angle': '0.3',
                 'threshold_distance': '0.05',
                 'threshold_angle': '0.05',
+                'angular_offset': f"{agent['robot_angular_offset']}",
             }
 
             # launch_arguments.update(extra_args if extra_args else {})
@@ -623,7 +630,7 @@ def include_waypoint_controller_implementation() -> list[launch.Action]:
 
             result.append(_include)
     else:
-        launch_arguments={
+        launch_arguments = {
             'namespace':
                 f'/{launch_configuration["manager_robot_tf_prefix"]}',
             'robot_tf_prefix':
@@ -714,6 +721,7 @@ def launch_teleop() -> list[launch.Action]:
         retval.append(TimerAction(period=2.0, actions=[r]))
 
     return retval
+
 
 def launch_static_transforms() -> list[launch.Action]:
     """Launch static transforms for the robots."""
