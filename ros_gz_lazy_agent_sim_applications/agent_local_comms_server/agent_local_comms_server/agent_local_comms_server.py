@@ -44,16 +44,6 @@ class LocalCommsManager(rclpy.node.Node):
         self.declare_parameter("remap_ids/3", 3)
         self.timer: rclpy.timer.Timer = None
 
-        def timer_cb():
-            res = self.get_node_names_and_namespaces()
-            self.get_logger().info(
-                f"Node names and namespaces: {res}"
-            )
-            self.timer.cancel()
-
-        self.timer = self.create_timer(5, timer_cb)
-
-
         self.knowledge_request_client = None
         self.knowledge_request_timer = self.create_timer(
             1.0, self.request_knowledge, autostart=False

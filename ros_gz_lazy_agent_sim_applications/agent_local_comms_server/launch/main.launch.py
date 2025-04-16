@@ -105,7 +105,7 @@ gazebo_config = {
     'manager_robot_tf_frame': '/base_link',
     'agents': [
         {
-            'robot_id': 5000,
+            'robot_id': 0,
             'robot_epuck_host': '127.0.0.1',
             'robot_epuck_port': 10000,
             'robot_comms_host': '127.0.0.1',
@@ -116,10 +116,10 @@ gazebo_config = {
             'robot_ypos': -0.1,
             'robot_theta': 0.0,
             'robot_teleop': False,
-            'robot_angular_offset': 1.0,
+            'robot_angular_offset': 0.0,
         },
         {
-            'robot_id': 5001,
+            'robot_id': 1,
             'robot_epuck_host': '127.0.0.1',
             'robot_epuck_port': 10001,
             'robot_comms_host': '127.0.0.1',
@@ -133,7 +133,7 @@ gazebo_config = {
             'robot_angular_offset': 0.0,
         },
         {
-            'robot_id': 5002,
+            'robot_id': 2,
             'robot_epuck_host': '127.0.0.1',
             'robot_epuck_port': 10002,
             'robot_comms_host': '127.0.0.1',
@@ -147,7 +147,7 @@ gazebo_config = {
             'robot_angular_offset': 0.0,
         },
         {
-            'robot_id': 5003,
+            'robot_id': 3,
             'robot_epuck_host': '127.0.0.1',
             'robot_epuck_port': 10003,
             'robot_comms_host': '127.0.0.1',
@@ -165,47 +165,19 @@ gazebo_config = {
 
 common_config = {
     'static_transforms': [
-        # {
-        #     'frame-id': 'earth',
-        #     'child-frame-id': 'epuck2_robot_0',
-        #     'x': '-0.1',
-        #     'y': '-0.1',
-        # },
-        # {
-        #     'frame-id': 'epuck2_robot_0/map',
-        #     'child-frame-id': 'epuck2_robot_0/odom',
-        # },
-        # {
-        #     'frame-id': 'earth',
-        #     'child-frame-id': 'epuck2_robot_1',
-        #     'x': '-0.1',
-        #     'y': '0.1',
-        # },
-        # {
-        #     'frame-id': 'epuck2_robot_1/map',
-        #     'child-frame-id': 'epuck2_robot_1/odom',
-        # },
-        # {
-        #     'frame-id': 'earth',
-        #     'child-frame-id': 'epuck2_robot_2',
-        #     'x': '0.1',
-        #     'y': '-0.1',
-        # },
-        # {
-        #     'frame-id': 'epuck2_robot_2/map',
-        #     'child-frame-id': 'epuck2_robot_2/odom',
-        # },
-        # {
-        #     'frame-id': 'earth',
-        #     'child-frame-id': 'epuck2_robot_3',
-        #     'x': '0.1',
-        #     'y': '0.1',
-        # },
-        # {
-        #     'frame-id': 'epuck2_robot_3/map',
-        #     'child-frame-id': 'epuck2_robot_3/odom',
-        # },
     ],
+    'static_agent_transforms': [
+        {
+            'frame-id': 'earth',
+            'child-frame-id': '{}',
+            'x': '{}',
+            'y': '{}',
+        },
+        {
+            'frame-id': '{}/map',
+            'child-frame-id': '{}/odom',
+        },
+    ]
 }
 
 launch_configuration = common_config
@@ -242,10 +214,10 @@ implementations = {
             'package': 'ros_gz_lazy_agent_sim_bringup',
             'launchfile': 'epuck2.launch.py',
             'oneshot': True,
-            # 'rviz_config': os.path.join(
-            #     'config',
-            #     'epuck2.rviz',
-            # ),
+            'rviz_config': os.path.join(
+                'config',
+                'epuck2.rviz',
+            ),
             'extra_args': {
                 'gui': 'false',
             },
@@ -768,6 +740,40 @@ def launch_static_transforms(context) -> list[launch.Action]:
         )
 
         result.append(_static_transform)
+
+    for i, transform in enumerate(launch_configuration['static_agent_transforms']):
+        for agent in launch_configuration['agents']:
+            arguments = []
+            for k, v in transform.items():
+                arguments.append(f'--{k}')
+                if 'frame' in k:
+                    arguments.append(
+                        f"{v.format(launch_configuration['manager_robot_tf_prefix'] + str(agent['robot_id']) + launch_configuration['manager_robot_tf_suffix'])}"
+                    )
+                elif k == 'x':
+                    arguments.append(
+                        f"{v.format(agent['robot_xpos'])}"
+                    )
+                elif k == 'y':
+                    arguments.append(
+                        f"{v.format(agent['robot_ypos'])}"
+                    )
+                elif k == 'yaw':
+                    arguments.append(
+                        f"{v.format(agent['robot_theta'])}"
+                    )
+                else:
+                    arguments.append(v)
+
+            _static_transform = launch_ros.actions.Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name=f'static_agent_transform_{i}',
+                output='screen',
+                arguments=arguments,
+            )
+
+            result.append(_static_transform)
 
     return result
 
