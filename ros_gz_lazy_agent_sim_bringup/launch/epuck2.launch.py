@@ -17,7 +17,7 @@
 import os
 from launch import LaunchDescription
 import launch
-from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
+from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable, OpaqueFunction
 from launch.actions import IncludeLaunchDescription, GroupAction
 import launch_ros
 from launch_ros.actions import ComposableNodeContainer, PushRosNamespace
@@ -39,7 +39,7 @@ def get_namespace(id: int):
     )
 
 
-def generate_launch_description():
+def setup_launch(context):
     # Declare launch arguments
     launch_args = list(
         map(
@@ -48,6 +48,7 @@ def generate_launch_description():
                 default_value=x[1],
             ),
             {
+                'agent_ids': '',
                 "gz_version": "9",
                 "gui": "true",
                 "manager_robot_tf_prefix": "epuck2_robot_",
@@ -123,9 +124,13 @@ def generate_launch_description():
 
     frame_publishers = []
 
-    for i in range(4):
+    def process_agent_ids(context):
+        agent_ids_value = LaunchConfiguration("agent_ids").perform(context)
+        return agent_ids_value.split(",") if agent_ids_value else []
+
+    for agent_id in process_agent_ids(context):
         group = GroupAction([
-            PushRosNamespace(f'epuck2_robot_{i}'),
+            PushRosNamespace(f'epuck2_robot_{agent_id}'),
             launch_ros.actions.Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
@@ -133,7 +138,7 @@ def generate_launch_description():
                     {"use_sim_time": True},
                     {
                         "frame_prefix": [
-                            *get_namespace(i),
+                            *get_namespace(agent_id),
                             "/",
                         ],
                         "publish_frequency": 60.0,
@@ -160,19 +165,20 @@ def generate_launch_description():
                 name='static_transform_publisher',
                 arguments=[
                     '--frame-id',
-                    [*get_namespace(i),],
+                    [*get_namespace(agent_id),],
                     '--child-frame-id',
-                    [*get_namespace(i), '/map'],
+                    [*get_namespace(agent_id), '/map'],
                 ],
             )
         ])
 
         frame_publishers.append(group)
 
-    return LaunchDescription(
-        launch_args
-        + [
-            gz_sim,
-            gz_container,
-        ] + frame_publishers
-    )
+    return launch_args + [
+        gz_sim,
+        gz_container,
+    ] + frame_publishers
+
+
+def generate_launch_description():
+    return LaunchDescription([OpaqueFunction(function=setup_launch)])

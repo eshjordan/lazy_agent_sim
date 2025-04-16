@@ -6,6 +6,7 @@ import socket
 import struct
 from typing import override
 import rclpy
+import rclpy.context
 import rclpy.time
 import rclpy.duration
 import rclpy.node
@@ -17,6 +18,7 @@ from agent_local_comms_server.packets import (
 )
 from socketserver import BaseRequestHandler, ThreadingUDPServer
 import threading
+import rclpy.timer
 import tf2_ros.buffer
 import tf2_ros.transform_listener
 from lazy_agent_sim_interfaces.msg import (
@@ -40,6 +42,17 @@ class LocalCommsManager(rclpy.node.Node):
         self.declare_parameter("remap_ids/1", 1)
         self.declare_parameter("remap_ids/2", 2)
         self.declare_parameter("remap_ids/3", 3)
+        self.timer: rclpy.timer.Timer = None
+
+        def timer_cb():
+            res = self.get_node_names_and_namespaces()
+            self.get_logger().info(
+                f"Node names and namespaces: {res}"
+            )
+            self.timer.cancel()
+
+        self.timer = self.create_timer(5, timer_cb)
+
 
         self.knowledge_request_client = None
         self.knowledge_request_timer = self.create_timer(
@@ -175,7 +188,7 @@ class LocalCommsManager(rclpy.node.Node):
                             )
                         )
 
-                    frame = manager.robot_frame_name(heartbeat.robot_id)
+                    frame = manager.robot_frame_name(heartbeat.robot_id, False)
 
                     # Find neighbouring robots
                     known_frames = [
@@ -183,7 +196,7 @@ class LocalCommsManager(rclpy.node.Node):
                             id,
                             knowledge_host,
                             knowledge_exchange_port,
-                            manager.robot_frame_name(id),
+                            manager.robot_frame_name(id, False),
                         )
                         for id, _, _, knowledge_host, knowledge_exchange_port in manager.known_robots
                         if id != heartbeat.robot_id
