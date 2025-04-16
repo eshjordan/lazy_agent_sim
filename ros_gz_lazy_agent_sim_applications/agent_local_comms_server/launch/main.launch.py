@@ -22,7 +22,7 @@ use_gazebo = True
 epuck_config = {
     'epuck_implementation': 'epuck_driver_cpp',
     'comms_manager_implementation': 'central_node_py',
-    'localisation_implementation': 'gz_localisation',
+    'localisation_implementation': 'vicon_localisation',
     'waypoint_controller_implementation': 'waypoint_controller_py',
     'agent_comms_implementation': 'epuck_firmware',
     'manager_server_host': '192.168.11.5',
@@ -45,6 +45,7 @@ epuck_config = {
             'robot_theta': 0.0,
             'robot_teleop': True,
             'robot_angular_offset': -2.360,
+            'robot_vicon_name': 'BW_epuck0',
         },
         {
             'robot_id': 5653,
@@ -59,6 +60,7 @@ epuck_config = {
             'robot_theta': 0.0,
             'robot_teleop': True,
             'robot_angular_offset': -2.360,
+            'robot_vicon_name': 'BW_epuck1',
         },
         # {
         #     'robot_id': 5731,
@@ -73,6 +75,7 @@ epuck_config = {
         #     'robot_theta': 0.0,
         #     'robot_teleop': True,
         #     'robot_angular_offset': -2.360,
+        #     'robot_vicon_name': 'BW_epuck2',
         # },
         # {
         #     'robot_id': 5831,
@@ -87,6 +90,7 @@ epuck_config = {
         #     'robot_theta': 0.0,
         #     'robot_teleop': False,
         #     'robot_angular_offset': -2.360,
+        #     'robot_vicon_name': 'BW_epuck3',
         # },
     ],
 }
@@ -94,7 +98,7 @@ epuck_config = {
 gazebo_config = {
     'epuck_implementation': 'gz_model_headless_py',
     'comms_manager_implementation': 'central_node_py',
-    'localisation_implementation': 'gz_localisation',
+    'localisation_implementation': 'vicon_localisation',
     'waypoint_controller_implementation': 'waypoint_controller_py',
     'agent_comms_implementation': 'gz_rf_py',
     'manager_server_host': '127.0.0.1',
@@ -117,49 +121,53 @@ gazebo_config = {
             'robot_theta': 0.0,
             'robot_teleop': False,
             'robot_angular_offset': 0.0,
+            'robot_vicon_name': 'BW_epuck0',
         },
-        {
-            'robot_id': 1,
-            'robot_epuck_host': '127.0.0.1',
-            'robot_epuck_port': 10001,
-            'robot_comms_host': '127.0.0.1',
-            'robot_comms_request_port': 50004,
-            'robot_knowledge_host': 'aa:bb:cc:dd:ee:01',
-            'robot_knowledge_exchange_port': 50005,
-            'robot_xpos': -0.1,
-            'robot_ypos': 0.1,
-            'robot_theta': 0.0,
-            'robot_teleop': False,
-            'robot_angular_offset': 0.0,
-        },
-        {
-            'robot_id': 2,
-            'robot_epuck_host': '127.0.0.1',
-            'robot_epuck_port': 10002,
-            'robot_comms_host': '127.0.0.1',
-            'robot_comms_request_port': 50006,
-            'robot_knowledge_host': 'aa:bb:cc:dd:ee:02',
-            'robot_knowledge_exchange_port': 50007,
-            'robot_xpos': 0.1,
-            'robot_ypos': -0.1,
-            'robot_theta': 0.0,
-            'robot_teleop': False,
-            'robot_angular_offset': 0.0,
-        },
-        {
-            'robot_id': 3,
-            'robot_epuck_host': '127.0.0.1',
-            'robot_epuck_port': 10003,
-            'robot_comms_host': '127.0.0.1',
-            'robot_comms_request_port': 50008,
-            'robot_knowledge_host': 'aa:bb:cc:dd:ee:03',
-            'robot_knowledge_exchange_port': 50009,
-            'robot_xpos': 0.1,
-            'robot_ypos': 0.1,
-            'robot_theta': 0.0,
-            'robot_teleop': False,
-            'robot_angular_offset': 0.0,
-        },
+        # {
+        #     'robot_id': 1,
+        #     'robot_epuck_host': '127.0.0.1',
+        #     'robot_epuck_port': 10001,
+        #     'robot_comms_host': '127.0.0.1',
+        #     'robot_comms_request_port': 50004,
+        #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:01',
+        #     'robot_knowledge_exchange_port': 50005,
+        #     'robot_xpos': -0.1,
+        #     'robot_ypos': 0.1,
+        #     'robot_theta': 0.0,
+        #     'robot_teleop': False,
+        #     'robot_angular_offset': 0.0,
+        #     'robot_vicon_name': 'BW_epuck1',
+        # },
+        # {
+        #     'robot_id': 2,
+        #     'robot_epuck_host': '127.0.0.1',
+        #     'robot_epuck_port': 10002,
+        #     'robot_comms_host': '127.0.0.1',
+        #     'robot_comms_request_port': 50006,
+        #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:02',
+        #     'robot_knowledge_exchange_port': 50007,
+        #     'robot_xpos': 0.1,
+        #     'robot_ypos': -0.1,
+        #     'robot_theta': 0.0,
+        #     'robot_teleop': False,
+        #     'robot_angular_offset': 0.0,
+        #     'robot_vicon_name': 'BW_epuck2',
+        # },
+        # {
+        #     'robot_id': 3,
+        #     'robot_epuck_host': '127.0.0.1',
+        #     'robot_epuck_port': 10003,
+        #     'robot_comms_host': '127.0.0.1',
+        #     'robot_comms_request_port': 50008,
+        #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:03',
+        #     'robot_knowledge_exchange_port': 50009,
+        #     'robot_xpos': 0.1,
+        #     'robot_ypos': 0.1,
+        #     'robot_theta': 0.0,
+        #     'robot_teleop': False,
+        #     'robot_angular_offset': 0.0,
+        #     'robot_vicon_name': 'BW_epuck3',
+        # },
     ],
 }
 
@@ -172,6 +180,10 @@ common_config = {
             'child-frame-id': '{}',
             'x': '{}',
             'y': '{}',
+        },
+        {
+            'frame-id': '{}',
+            'child-frame-id': '{}/map',
         },
         {
             'frame-id': '{}/map',
@@ -247,8 +259,19 @@ implementations = {
     },
     'localisation_implementation': {
         'gz_localisation': {
-            'package': 'localisation_bringup',
-            'launchfile': 'main.launch.py',
+        },
+        'vicon_localisation': {
+            'package': 'agent_local_comms_server',
+            'launchfile': 'pose_tf.launch.py',
+            'oneshot': False,
+            'extra_args': {
+                'source_topic_name': '/vrpn_mocap/{}/pose',
+                'source_frame_id': 'earth',
+                'tf_frame_id': '{}/odom',
+                'tf_child_frame_id': '{}/base_link',
+                'pose_topic_name': '/{}/pose',
+                'pose_frame_id': '{}/odom',
+            },
         }
     },
     'waypoint_controller_implementation': {
@@ -447,7 +470,7 @@ def include_comms_manager_implementation(context) -> list[launch.Action]:
                 f"{launch_configuration['manager_robot_tf_suffix']}",
             'robot_tf_frame':
                 f"{launch_configuration['manager_robot_tf_frame']}",
-            'agent_ids':
+            'robot_ids':
                 f"{','.join([f"{agent['robot_id']}" for agent in launch_configuration['agents']])}",
         }.items(),
     )
@@ -514,7 +537,6 @@ def include_agent_comms_implementations(context) -> list[launch.Action]:
 def include_localisation_implementation(context) -> list[launch.Action]:
     """Include the localisation implementation."""
     result = []
-    return result
 
     launchfile = get_implementation_value(
         'localisation_implementation',
@@ -524,7 +546,78 @@ def include_localisation_implementation(context) -> list[launch.Action]:
     if not launchfile:
         return result
 
-    for i, agent in enumerate(launch_configuration['agents']):
+    extra_args = get_implementation_value(
+        'localisation_implementation',
+        'extra_args',
+    )
+
+    def get_namespace(i: int):
+        return (
+            f"{launch_configuration['manager_robot_tf_prefix']}"
+            + f'{i}'
+            + f"{launch_configuration['manager_robot_tf_suffix']}"
+        )
+
+    if not get_implementation_value('localisation_implementation', 'oneshot'):
+        for i, agent in enumerate(launch_configuration['agents']):
+            robot_id = agent['robot_id']
+
+            launch_arguments = {}
+
+            launch_arguments.update(extra_args if extra_args else {})
+            if launch_configuration['localisation_implementation'] == 'vicon_localisation':
+                if 'source_topic_name' in launch_arguments:
+                    launch_arguments['source_topic_name'] = launch_arguments['source_topic_name'].format(
+                        agent['robot_vicon_name'])
+                if 'source_frame_id' in launch_arguments:
+                    launch_arguments['source_frame_id'] = launch_arguments['source_frame_id'].format(
+                        get_namespace(robot_id))
+                if 'tf_frame_id' in launch_arguments:
+                    launch_arguments['tf_frame_id'] = launch_arguments['tf_frame_id'].format(
+                        get_namespace(robot_id))
+                if 'tf_child_frame_id' in launch_arguments:
+                    launch_arguments['tf_child_frame_id'] = launch_arguments['tf_child_frame_id'].format(
+                        get_namespace(robot_id))
+                if 'pose_topic_name' in launch_arguments:
+                    launch_arguments['pose_topic_name'] = launch_arguments['pose_topic_name'].format(
+                        get_namespace(robot_id))
+                if 'pose_frame_id' in launch_arguments:
+                    launch_arguments['pose_frame_id'] = launch_arguments['pose_frame_id'].format(
+                        get_namespace(robot_id))
+
+            _include = IncludeLaunch(
+                PythonLaunch(
+                    PathJoin(
+                        [
+                            FindPackageShare(
+                                get_implementation_value(
+                                    'localisation_implementation',
+                                    'package',
+                                ),
+                            ),
+                            'launch',
+                            get_implementation_value(
+                                'localisation_implementation',
+                                'launchfile',
+                            ),
+                        ]
+                    )
+                ),
+                launch_arguments=launch_arguments.items(),
+            )
+
+            result.append(_include)
+    else:
+        launch_arguments = {
+            'robot_ids': f"{','.join([f"{agent['robot_id']}" for agent in launch_configuration['agents']])}",
+            'robot_tf_prefix':
+            f"{launch_configuration['manager_robot_tf_prefix']}",
+                'robot_tf_suffix':
+                    f"{launch_configuration['manager_robot_tf_suffix']}",
+        }
+
+        launch_arguments.update(extra_args if extra_args else {})
+
         _include = IncludeLaunch(
             PythonLaunch(
                 PathJoin(
@@ -543,13 +636,7 @@ def include_localisation_implementation(context) -> list[launch.Action]:
                     ]
                 )
             ),
-            launch_arguments={
-                'id': f'{i}',
-                'robot_tf_prefix':
-                    f"{launch_configuration['manager_robot_tf_prefix']}",
-                'robot_tf_suffix':
-                    f"{launch_configuration['manager_robot_tf_suffix']}",
-            }.items(),
+            launch_arguments=launch_arguments.items(),
         )
 
         result.append(_include)
@@ -570,7 +657,7 @@ def include_waypoint_controller_implementation(context) -> list[launch.Action]:
         return result
 
     extra_args = get_implementation_value(
-        'epuck_implementation',
+        'waypoint_controller_implementation',
         'extra_args',
     )
 
@@ -600,7 +687,7 @@ def include_waypoint_controller_implementation(context) -> list[launch.Action]:
                 'angular_offset': f"{agent['robot_angular_offset']}",
             }
 
-            # launch_arguments.update(extra_args if extra_args else {})
+            launch_arguments.update(extra_args if extra_args else {})
 
             _include = IncludeLaunch(
                 PythonLaunch(

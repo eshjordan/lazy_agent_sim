@@ -25,7 +25,7 @@ from launch_ros.actions import ComposableNodeContainer, PushRosNamespace
 from launch_ros.descriptions import ComposableNode
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FileContent
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FileContent, PythonExpression
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import Node
 
@@ -39,7 +39,7 @@ ROBOT_CONFIG_TEMPLATE = [
         "direction": "ROS_TO_GZ",
     },
     {
-        "ros_topic_name": "{}/pose",
+        "ros_topic_name": "/vrpn_mocap/BW_epuck0/pose",
         "gz_topic_name": "/model{}/pose",
         "ros_type_name": "geometry_msgs/msg/PoseStamped",
         "gz_type_name": "gz.msgs.Pose",
@@ -273,7 +273,7 @@ def setup_launch(context):
                 default_value=x[1],
             ),
             {
-                'agent_ids': '',
+                'robot_ids': '',
                 "gz_version": "9",
                 "gui": "true",
                 "manager_robot_tf_prefix": "epuck2_robot_",
@@ -344,12 +344,12 @@ def setup_launch(context):
         "GZ_TO_ROS",
     )
 
-    def process_agent_ids(context):
-        agent_ids_value = LaunchConfiguration("agent_ids").perform(context)
-        return agent_ids_value.split(",") if agent_ids_value else []
+    def process_robot_ids(context):
+        robot_ids_value = LaunchConfiguration("robot_ids").perform(context)
+        return robot_ids_value.split(",") if robot_ids_value else []
 
     # TODO: Make models in gazebo world configurable from launchfile
-    robot_ids = process_agent_ids(context)
+    robot_ids = process_robot_ids(context)
     gz_world_robot_ids = [0, 1, 2, 3]
     frame_publishers = []
 
@@ -394,28 +394,18 @@ def setup_launch(context):
                     },
                 ],
             ),
-            launch_ros.actions.Node(
-                package='tf2_ros',
-                executable='static_transform_publisher',
-                name='tf_pub_map',
-                arguments=[
-                    '--frame-id',
-                    get_namespace(robot_id),
-                    '--child-frame-id',
-                    get_namespace(robot_id) + '/map',
-                ],
-            ),
             # Create static transforms to wrap the gazebo-named frames
             launch_ros.actions.Node(
                 package='tf2_ros',
                 executable='static_transform_publisher',
                 name='tf_pub_gz_odom',
                 output='screen',
+                condition=IfCondition(PythonExpression(f"'{get_namespace(robot_id)}/odom' != 'epuck2_robot_{gz_world_robot_id}/odom'")),
                 arguments=[
                     '--frame-id',
                     f"{get_namespace(robot_id)}/odom",
                     '--child-frame-id',
-                    f"/epuck2_robot_{gz_world_robot_id}/odom",
+                    f"epuck2_robot_{gz_world_robot_id}/odom",
                 ],
             ),
             launch_ros.actions.Node(
@@ -423,9 +413,10 @@ def setup_launch(context):
                 executable='static_transform_publisher',
                 name='tf_pub_gz_base_link',
                 output='screen',
+                condition=IfCondition(PythonExpression(f"'epuck2_robot_{gz_world_robot_id}/base_link' != '{get_namespace(robot_id)}/base_link'")),
                 arguments=[
                     '--frame-id',
-                    f"/epuck2_robot_{gz_world_robot_id}/base_link",
+                    f"epuck2_robot_{gz_world_robot_id}/base_link",
                     '--child-frame-id',
                     f"{get_namespace(robot_id)}/base_link",
                 ],
