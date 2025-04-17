@@ -98,7 +98,7 @@ epuck_config = {
 gazebo_config = {
     'epuck_implementation': 'gz_model_headless_py',
     'comms_manager_implementation': 'central_node_py',
-    'localisation_implementation': 'vicon_localisation',
+    'localisation_implementation': 'gz_localisation',
     'waypoint_controller_implementation': 'waypoint_controller_py',
     'agent_comms_implementation': 'gz_rf_py',
     'manager_server_host': '127.0.0.1',
@@ -220,6 +220,7 @@ implementations = {
             ),
             'extra_args': {
                 'gui': 'true',
+                'gz_version': '8',
             },
         },
         'gz_model_headless_py': {

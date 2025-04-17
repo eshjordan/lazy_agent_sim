@@ -39,7 +39,7 @@ ROBOT_CONFIG_TEMPLATE = [
         "direction": "ROS_TO_GZ",
     },
     {
-        "ros_topic_name": "/vrpn_mocap/BW_epuck0/pose",
+        "ros_topic_name": "{}/pose",
         "gz_topic_name": "/model{}/pose",
         "ros_type_name": "geometry_msgs/msg/PoseStamped",
         "gz_type_name": "gz.msgs.Pose",
@@ -274,7 +274,7 @@ def setup_launch(context):
             ),
             {
                 'robot_ids': '',
-                "gz_version": "9",
+                "gz_version": "8",
                 "gui": "true",
                 "manager_robot_tf_prefix": "epuck2_robot_",
                 "manager_robot_tf_suffix": "",
@@ -400,7 +400,8 @@ def setup_launch(context):
                 executable='static_transform_publisher',
                 name='tf_pub_gz_odom',
                 output='screen',
-                condition=IfCondition(PythonExpression(f"'{get_namespace(robot_id)}/odom' != 'epuck2_robot_{gz_world_robot_id}/odom'")),
+                condition=IfCondition(PythonExpression(
+                    f"'{get_namespace(robot_id)}/odom' != 'epuck2_robot_{gz_world_robot_id}/odom'")),
                 arguments=[
                     '--frame-id',
                     f"{get_namespace(robot_id)}/odom",
@@ -413,7 +414,8 @@ def setup_launch(context):
                 executable='static_transform_publisher',
                 name='tf_pub_gz_base_link',
                 output='screen',
-                condition=IfCondition(PythonExpression(f"'epuck2_robot_{gz_world_robot_id}/base_link' != '{get_namespace(robot_id)}/base_link'")),
+                condition=IfCondition(PythonExpression(
+                    f"'epuck2_robot_{gz_world_robot_id}/base_link' != '{get_namespace(robot_id)}/base_link'")),
                 arguments=[
                     '--frame-id',
                     f"epuck2_robot_{gz_world_robot_id}/base_link",
