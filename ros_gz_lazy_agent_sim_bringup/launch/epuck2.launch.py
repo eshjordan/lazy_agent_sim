@@ -67,13 +67,6 @@ ROBOT_CONFIG_TEMPLATE = [
         "direction": "GZ_TO_ROS",
     },
     {
-        "ros_topic_name": "/tf",
-        "gz_topic_name": "/model{}/pose",
-        "ros_type_name": "tf2_msgs/msg/TFMessage",
-        "gz_type_name": "gz.msgs.Pose",
-        "direction": "GZ_TO_ROS",
-    },
-    {
         "ros_topic_name": "/tf_static",
         "gz_topic_name": "/model{}/pose_static",
         "ros_type_name": "tf2_msgs/msg/TFMessage",

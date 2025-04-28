@@ -13,10 +13,12 @@ def setup_launch(context):
             {
                 'source_topic_name': '',
                 'source_frame_id': 'earth',
-                'tf_frame_id': 'odom',
-                'tf_child_frame_id': 'base_link',
+                'source_child_frame_id': 'base_link',
+                'tf_frame_id': 'map',
+                'tf_child_frame_id': 'odom',
                 'pose_topic_name': '',
                 'pose_frame_id': 'earth',
+                'pose_child_frame_id': 'odom',
             }.items(),
         )
     )
@@ -30,10 +32,12 @@ def setup_launch(context):
                 {
                     'source_topic_name': launch.substitutions.LaunchConfiguration('source_topic_name'),
                     'source_frame_id': launch.substitutions.LaunchConfiguration('source_frame_id'),
+                    'source_child_frame_id': launch.substitutions.LaunchConfiguration('source_child_frame_id'),
                     'tf_frame_id': launch.substitutions.LaunchConfiguration('tf_frame_id'),
                     'tf_child_frame_id': launch.substitutions.LaunchConfiguration('tf_child_frame_id'),
                     'pose_topic_name': launch.substitutions.LaunchConfiguration('pose_topic_name'),
                     'pose_frame_id': launch.substitutions.LaunchConfiguration('pose_frame_id'),
+                    'pose_child_frame_id': launch.substitutions.LaunchConfiguration('pose_child_frame_id'),
                 }
             ]
         ),

@@ -96,7 +96,7 @@ epuck_config = {
 }
 
 gazebo_config = {
-    'epuck_implementation': 'gz_model_headless_py',
+    'epuck_implementation': 'gz_model_py',
     'comms_manager_implementation': 'central_node_py',
     'localisation_implementation': 'gz_localisation',
     'waypoint_controller_implementation': 'waypoint_controller_py',
@@ -185,10 +185,10 @@ common_config = {
             'frame-id': '{}',
             'child-frame-id': '{}/map',
         },
-        {
-            'frame-id': '{}/map',
-            'child-frame-id': '{}/odom',
-        },
+        # {
+        #     'frame-id': '{}/map',
+        #     'child-frame-id': '{}/odom',
+        # },
     ]
 }
 
@@ -260,6 +260,23 @@ implementations = {
     },
     'localisation_implementation': {
         'gz_localisation': {
+            'package': 'agent_local_comms_server',
+            'launchfile': 'pose_tf.launch.py',
+            'oneshot': False,
+            'extra_args': {
+                'source_topic_name': '/{}/pose',
+                'source_frame_id': 'earth',
+                'source_child_frame_id': '{}/base_link',
+                'tf_frame_id': '{}/map',
+                'tf_child_frame_id': '{}/odom',
+            },
+            # 'extra_args': {
+            #     'source_topic_name': '/{}/pose',
+            #     'source_frame_id': 'earth',
+            #     'source_child_frame_id': '{}/odom',
+            #     'tf_frame_id': '{}/map',
+            #     'tf_child_frame_id': '{}/odom',
+            # },
         },
         'vicon_localisation': {
             'package': 'agent_local_comms_server',
@@ -268,10 +285,9 @@ implementations = {
             'extra_args': {
                 'source_topic_name': '/vrpn_mocap/{}/pose',
                 'source_frame_id': 'earth',
-                'tf_frame_id': '{}/odom',
-                'tf_child_frame_id': '{}/base_link',
-                'pose_topic_name': '/{}/pose',
-                'pose_frame_id': '{}/odom',
+                'source_child_frame_id': '{}/base_link',
+                'tf_frame_id': '{}/map',
+                'tf_child_frame_id': '{}/odom',
             },
         }
     },
@@ -284,7 +300,7 @@ implementations = {
                 'min_linear_vel': '0.05',
                 'max_linear_vel': '0.1',
                 'min_angular_vel': '0.0',
-                'max_angular_vel': '3.14',
+                'max_angular_vel': '1.57',
                 'slow_distance': '0.3',
                 'slow_angle': '0.3',
                 'threshold_distance': '0.05',
@@ -566,12 +582,15 @@ def include_localisation_implementation(context) -> list[launch.Action]:
             launch_arguments = {}
 
             launch_arguments.update(extra_args if extra_args else {})
-            if launch_configuration['localisation_implementation'] == 'vicon_localisation':
+            if launch_configuration['localisation_implementation'] == 'vicon_localisation' or launch_configuration['localisation_implementation'] == 'gz_localisation':
                 if 'source_topic_name' in launch_arguments:
                     launch_arguments['source_topic_name'] = launch_arguments['source_topic_name'].format(
-                        agent['robot_vicon_name'])
+                        agent['robot_vicon_name'] if launch_configuration['localisation_implementation'] == 'vicon_localisation' else get_namespace(robot_id))
                 if 'source_frame_id' in launch_arguments:
                     launch_arguments['source_frame_id'] = launch_arguments['source_frame_id'].format(
+                        get_namespace(robot_id))
+                if 'source_child_frame_id' in launch_arguments:
+                    launch_arguments['source_child_frame_id'] = launch_arguments['source_child_frame_id'].format(
                         get_namespace(robot_id))
                 if 'tf_frame_id' in launch_arguments:
                     launch_arguments['tf_frame_id'] = launch_arguments['tf_frame_id'].format(
@@ -584,6 +603,9 @@ def include_localisation_implementation(context) -> list[launch.Action]:
                         get_namespace(robot_id))
                 if 'pose_frame_id' in launch_arguments:
                     launch_arguments['pose_frame_id'] = launch_arguments['pose_frame_id'].format(
+                        get_namespace(robot_id))
+                if 'pose_child_frame_id' in launch_arguments:
+                    launch_arguments['pose_child_frame_id'] = launch_arguments['pose_child_frame_id'].format(
                         get_namespace(robot_id))
 
             _include = IncludeLaunch(
@@ -900,7 +922,7 @@ def setup_launch(context):
         #     ]
         # ),
         # ros2 launch vrpn_mocap client.launch.yaml server:=192.168.11.3 port:=3883
-        # sudo pkill -f static_transform_publisher ; sudo pkill -f controller ; sudo pkill -f agent_local_comms_server
+        # sudo pkill -f static_transform_publisher ; sudo pkill -f controller ; sudo pkill -f agent_local_comms_server ; sudo pkill ros ; sudo pkill ros2 ; sudo pkill rviz2
     ]
 
 
