@@ -198,7 +198,7 @@ class FramePublisher(rclpy.node.Node):
             return
 
         # Convert the first transform from tf_buffer into a transformation matrix
-        tf_frame_id_to_source_frame_id_matrix = inverse_matrix(compose_matrix(
+        tf_frame_id_to_source_frame_id_matrix = compose_matrix(
             translate=[
                 t1.transform.translation.x,
                 t1.transform.translation.y,
@@ -209,7 +209,7 @@ class FramePublisher(rclpy.node.Node):
                 t1.transform.rotation.z,
                 t1.transform.rotation.w
             ]),
-        ))
+        )
 
         # Convert the pose from the message into a transformation matrix
         source_frame_id_to_source_child_frame_id_matrix = compose_matrix(
@@ -226,7 +226,7 @@ class FramePublisher(rclpy.node.Node):
         )
 
         # Convert the second transform from tf_buffer into a transformation matrix
-        source_child_frame_id_to_tf_child_frame_id_matrix = inverse_matrix(compose_matrix(
+        source_child_frame_id_to_tf_child_frame_id_matrix = compose_matrix(
             translate=[
                 t2.transform.translation.x,
                 t2.transform.translation.y,
@@ -237,7 +237,7 @@ class FramePublisher(rclpy.node.Node):
                 t2.transform.rotation.z,
                 t2.transform.rotation.w
             ]),
-        ))
+        )
 
         tf_frame_id_to_tf_child_frame_id_matrix = concatenate_matrices(
             tf_frame_id_to_source_frame_id_matrix,
@@ -265,32 +265,6 @@ class FramePublisher(rclpy.node.Node):
         child_tf.transform.rotation.z = quaternion[2]
         child_tf.transform.rotation.w = quaternion[3]
 
-        # 'source_frame_id': 'earth',
-        # 'source_child_frame_id': 'epuck2_robot_0/base_link',
-        # 'tf_frame_id': 'epuck2_robot_0/map',
-        # 'tf_child_frame_id': 'epuck2_robot_0/odom',
-
-        # OK
-        # log_tf_msg(t1)
-        # log_tf_matrix(tf_frame_id_to_source_frame_id_matrix, self.get_parameter('tf_frame_id').value, self.get_parameter('source_frame_id').value)
-
-        # OK
-        # log_tf_pose_msg(msg, self.get_parameter('source_child_frame_id').value)
-        # log_tf_matrix(source_frame_id_to_source_child_frame_id_matrix,
-        #               self.get_parameter('source_frame_id').value, self.get_parameter('source_child_frame_id').value)
-
-        # OK
-        log_tf_msg(t2)
-
-        # NOT OK
-        log_tf_matrix(
-            source_child_frame_id_to_tf_child_frame_id_matrix,
-            self.get_parameter('source_child_frame_id').value,
-            self.get_parameter('tf_child_frame_id').value)
-
-        # NOT OK
-        # log_tf_msg(child_tf)
-
         # Send the transformation
         self.tf_buffer.set_transform(child_tf, 'default_authority')
         self.tf_broadcaster.sendTransform(child_tf)
@@ -303,13 +277,6 @@ class FramePublisher(rclpy.node.Node):
                     self.get_parameter('pose_frame_id').value,
                     timestamp,
                 )
-                # t = self.tf_buffer.lookup_transform_full(
-                #     self.get_parameter('tf_child_frame_id').value,
-                #     rclpy.time.Time(),
-                #     self.get_parameter('pose_frame_id').value,
-                #     rclpy.time.Time(),
-                #     self.get_parameter('tf_child_frame_id').value,
-                # )
             except tf2_py.LookupException as e:
                 self.get_logger().error(
                     f"LookupException: {e}", throttle_duration_sec=2.0)

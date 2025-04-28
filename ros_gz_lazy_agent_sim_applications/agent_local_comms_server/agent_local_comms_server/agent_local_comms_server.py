@@ -6,7 +6,6 @@ import socket
 import struct
 from typing import override
 import rclpy
-import rclpy.context
 import rclpy.time
 import rclpy.duration
 import rclpy.node
@@ -18,7 +17,6 @@ from agent_local_comms_server.packets import (
 )
 from socketserver import BaseRequestHandler, ThreadingUDPServer
 import threading
-import rclpy.timer
 import tf2_ros.buffer
 import tf2_ros.transform_listener
 from lazy_agent_sim_interfaces.msg import (
@@ -42,7 +40,6 @@ class LocalCommsManager(rclpy.node.Node):
         self.declare_parameter("remap_ids/1", 1)
         self.declare_parameter("remap_ids/2", 2)
         self.declare_parameter("remap_ids/3", 3)
-        self.timer: rclpy.timer.Timer = None
 
         self.knowledge_request_client = None
         self.knowledge_request_timer = self.create_timer(

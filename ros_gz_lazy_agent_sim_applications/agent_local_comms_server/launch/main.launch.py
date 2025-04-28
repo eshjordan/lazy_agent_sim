@@ -123,51 +123,51 @@ gazebo_config = {
             'robot_angular_offset': 0.0,
             'robot_vicon_name': 'BW_epuck0',
         },
-        # {
-        #     'robot_id': 1,
-        #     'robot_epuck_host': '127.0.0.1',
-        #     'robot_epuck_port': 10001,
-        #     'robot_comms_host': '127.0.0.1',
-        #     'robot_comms_request_port': 50004,
-        #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:01',
-        #     'robot_knowledge_exchange_port': 50005,
-        #     'robot_xpos': -0.1,
-        #     'robot_ypos': 0.1,
-        #     'robot_theta': 0.0,
-        #     'robot_teleop': False,
-        #     'robot_angular_offset': 0.0,
-        #     'robot_vicon_name': 'BW_epuck1',
-        # },
-        # {
-        #     'robot_id': 2,
-        #     'robot_epuck_host': '127.0.0.1',
-        #     'robot_epuck_port': 10002,
-        #     'robot_comms_host': '127.0.0.1',
-        #     'robot_comms_request_port': 50006,
-        #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:02',
-        #     'robot_knowledge_exchange_port': 50007,
-        #     'robot_xpos': 0.1,
-        #     'robot_ypos': -0.1,
-        #     'robot_theta': 0.0,
-        #     'robot_teleop': False,
-        #     'robot_angular_offset': 0.0,
-        #     'robot_vicon_name': 'BW_epuck2',
-        # },
-        # {
-        #     'robot_id': 3,
-        #     'robot_epuck_host': '127.0.0.1',
-        #     'robot_epuck_port': 10003,
-        #     'robot_comms_host': '127.0.0.1',
-        #     'robot_comms_request_port': 50008,
-        #     'robot_knowledge_host': 'aa:bb:cc:dd:ee:03',
-        #     'robot_knowledge_exchange_port': 50009,
-        #     'robot_xpos': 0.1,
-        #     'robot_ypos': 0.1,
-        #     'robot_theta': 0.0,
-        #     'robot_teleop': False,
-        #     'robot_angular_offset': 0.0,
-        #     'robot_vicon_name': 'BW_epuck3',
-        # },
+        {
+            'robot_id': 1,
+            'robot_epuck_host': '127.0.0.1',
+            'robot_epuck_port': 10001,
+            'robot_comms_host': '127.0.0.1',
+            'robot_comms_request_port': 50004,
+            'robot_knowledge_host': 'aa:bb:cc:dd:ee:01',
+            'robot_knowledge_exchange_port': 50005,
+            'robot_xpos': -0.1,
+            'robot_ypos': 0.1,
+            'robot_theta': 0.0,
+            'robot_teleop': False,
+            'robot_angular_offset': 0.0,
+            'robot_vicon_name': 'BW_epuck1',
+        },
+        {
+            'robot_id': 2,
+            'robot_epuck_host': '127.0.0.1',
+            'robot_epuck_port': 10002,
+            'robot_comms_host': '127.0.0.1',
+            'robot_comms_request_port': 50006,
+            'robot_knowledge_host': 'aa:bb:cc:dd:ee:02',
+            'robot_knowledge_exchange_port': 50007,
+            'robot_xpos': 0.1,
+            'robot_ypos': -0.1,
+            'robot_theta': 0.0,
+            'robot_teleop': False,
+            'robot_angular_offset': 0.0,
+            'robot_vicon_name': 'BW_epuck2',
+        },
+        {
+            'robot_id': 3,
+            'robot_epuck_host': '127.0.0.1',
+            'robot_epuck_port': 10003,
+            'robot_comms_host': '127.0.0.1',
+            'robot_comms_request_port': 50008,
+            'robot_knowledge_host': 'aa:bb:cc:dd:ee:03',
+            'robot_knowledge_exchange_port': 50009,
+            'robot_xpos': 0.1,
+            'robot_ypos': 0.1,
+            'robot_theta': 0.0,
+            'robot_teleop': False,
+            'robot_angular_offset': 0.0,
+            'robot_vicon_name': 'BW_epuck3',
+        },
     ],
 }
 
@@ -205,10 +205,13 @@ implementations = {
             'package': 'epuck_driver_cpp',
             'launchfile': 'epuck2_controller.launch.py',
             'oneshot': False,
-            # 'rviz_config': os.path.join(
-            #     'config',
-            #     'multi_epuck2_driver_rviz.rviz',
-            # ),
+            'rviz_config': os.path.join(
+                'config',
+                'multi_epuck2_driver_rviz.rviz',
+            ),
+            'extra_args': {
+                'rviz': 'false',
+            },
         },
         'gz_model_py': {
             'package': 'ros_gz_lazy_agent_sim_bringup',
@@ -270,13 +273,6 @@ implementations = {
                 'tf_frame_id': '{}/map',
                 'tf_child_frame_id': '{}/odom',
             },
-            # 'extra_args': {
-            #     'source_topic_name': '/{}/pose',
-            #     'source_frame_id': 'earth',
-            #     'source_child_frame_id': '{}/odom',
-            #     'tf_frame_id': '{}/map',
-            #     'tf_child_frame_id': '{}/odom',
-            # },
         },
         'vicon_localisation': {
             'package': 'agent_local_comms_server',
@@ -300,7 +296,7 @@ implementations = {
                 'min_linear_vel': '0.05',
                 'max_linear_vel': '0.1',
                 'min_angular_vel': '0.0',
-                'max_angular_vel': '1.57',
+                'max_angular_vel': '3.14',
                 'slow_distance': '0.3',
                 'slow_angle': '0.3',
                 'threshold_distance': '0.05',
@@ -898,32 +894,7 @@ def setup_launch(context):
         launch_static_transforms(context) + \
         launch_teleop(context)
 
-    return actions + [
-        # launch_ros.actions.Node(
-        #     executable='pose_tf',
-        #     package='agent_local_comms_server',
-        #     parameters=[
-        #         {
-        #             'topic_name': '/vrpn_mocap/BW_epuck0/pose',
-        #             'frame_id': 'earth',
-        #             'child_frame_id': 'epuck2_robot_0/base_link',
-        #         }
-        #     ]
-        # ),
-        # launch_ros.actions.Node(
-        #     executable='pose_tf',
-        #     package='agent_local_comms_server',
-        #     parameters=[
-        #         {
-        #             'topic_name': '/vrpn_mocap/BW_epuck1/pose',
-        #             'frame_id': 'earth',
-        #             'child_frame_id': 'epuck2_robot_1/base_link',
-        #         }
-        #     ]
-        # ),
-        # ros2 launch vrpn_mocap client.launch.yaml server:=192.168.11.3 port:=3883
-        # sudo pkill -f static_transform_publisher ; sudo pkill -f controller ; sudo pkill -f agent_local_comms_server ; sudo pkill ros ; sudo pkill ros2 ; sudo pkill rviz2
-    ]
+    return actions
 
 
 def generate_launch_description():
@@ -931,7 +902,3 @@ def generate_launch_description():
     return launch.LaunchDescription([
         launch.actions.OpaqueFunction(function=setup_launch)
     ])
-
-
-# if __name__ == '__main__':
-#     generate_launch_description()
