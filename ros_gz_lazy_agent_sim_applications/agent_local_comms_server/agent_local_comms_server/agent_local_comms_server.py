@@ -175,7 +175,7 @@ class LocalCommsManager(rclpy.node.Node):
                             )
                         )
 
-                    frame = manager.robot_frame_name(heartbeat.robot_id)
+                    frame = manager.robot_frame_name(heartbeat.robot_id, False)
 
                     # Find neighbouring robots
                     known_frames = [
@@ -183,7 +183,7 @@ class LocalCommsManager(rclpy.node.Node):
                             id,
                             knowledge_host,
                             knowledge_exchange_port,
-                            manager.robot_frame_name(id),
+                            manager.robot_frame_name(id, False),
                         )
                         for id, _, _, knowledge_host, knowledge_exchange_port in manager.known_robots
                         if id != heartbeat.robot_id
