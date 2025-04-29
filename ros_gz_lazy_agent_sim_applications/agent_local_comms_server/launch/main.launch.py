@@ -96,7 +96,7 @@ epuck_config = {
 }
 
 gazebo_config = {
-    'epuck_implementation': 'gz_model_py',
+    'epuck_implementation': 'gz_model_headless_py',
     'comms_manager_implementation': 'central_node_py',
     'localisation_implementation': 'gz_localisation',
     'waypoint_controller_implementation': 'waypoint_controller_py',
