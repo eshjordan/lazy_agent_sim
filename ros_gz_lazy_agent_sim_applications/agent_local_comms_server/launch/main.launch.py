@@ -1,6 +1,7 @@
 """Launchfile for the cpp_epuck package."""
 
 import os
+from typing import Dict, Iterable, Optional, Tuple
 import launch
 from launch import SomeSubstitutionsType
 from launch.actions import (
@@ -15,6 +16,7 @@ from launch.substitutions import (
 )
 
 import launch_ros.actions
+import launch_ros.parameters_type
 from launch_ros.substitutions import FindPackageShare
 
 use_gazebo = True
@@ -25,6 +27,7 @@ epuck_config = {
     'localisation_implementation': 'vicon_localisation',
     'waypoint_controller_implementation': 'waypoint_controller_py',
     'agent_comms_implementation': 'epuck_firmware',
+    'mocap_implementation': 'vrpn_mocap',
     'manager_server_host': '192.168.11.5',
     'manager_server_port': 50000,
     'manager_threshold_dist': 0.3,
@@ -34,6 +37,7 @@ epuck_config = {
     'agents': [
         {
             'robot_id': 5785,
+            'robot_name': 'epuck2_robot_{agent["robot_id"]}',
             'robot_epuck_host': '192.168.11.11',
             'robot_epuck_port': 1000,
             'robot_comms_host': '192.168.11.11',
@@ -49,6 +53,7 @@ epuck_config = {
         },
         {
             'robot_id': 5653,
+            'robot_name': 'epuck2_robot_{agent["robot_id"]}',
             'robot_epuck_host': '192.168.11.12',
             'robot_epuck_port': 1000,
             'robot_comms_host': '192.168.11.12',
@@ -64,6 +69,7 @@ epuck_config = {
         },
         # {
         #     'robot_id': 5731,
+        #     'robot_name': 'epuck2_robot_{agent["robot_id"]}',
         #     'robot_epuck_host': '192.168.11.13',
         #     'robot_epuck_port': 1000,
         #     'robot_comms_host': '192.168.11.13',
@@ -79,6 +85,7 @@ epuck_config = {
         # },
         # {
         #     'robot_id': 5831,
+        #     'robot_name': 'epuck2_robot_{agent["robot_id"]}',
         #     'robot_epuck_host': '192.168.11.14',
         #     'robot_epuck_port': 1000,
         #     'robot_comms_host': '192.168.11.14',
@@ -101,6 +108,7 @@ gazebo_config = {
     'localisation_implementation': 'gz_localisation',
     'waypoint_controller_implementation': 'waypoint_controller_py',
     'agent_comms_implementation': 'gz_rf_py',
+    'mocap_implementation': 'none',
     'manager_server_host': '127.0.0.1',
     'manager_server_port': 50000,
     'manager_threshold_dist': 0.3,
@@ -110,6 +118,7 @@ gazebo_config = {
     'agents': [
         {
             'robot_id': 0,
+            'robot_name': 'epuck2_robot_{agent["robot_id"]}',
             'robot_epuck_host': '127.0.0.1',
             'robot_epuck_port': 10000,
             'robot_comms_host': '127.0.0.1',
@@ -125,6 +134,7 @@ gazebo_config = {
         },
         {
             'robot_id': 1,
+            'robot_name': 'epuck2_robot_{agent["robot_id"]}',
             'robot_epuck_host': '127.0.0.1',
             'robot_epuck_port': 10001,
             'robot_comms_host': '127.0.0.1',
@@ -140,6 +150,7 @@ gazebo_config = {
         },
         {
             'robot_id': 2,
+            'robot_name': 'epuck2_robot_{agent["robot_id"]}',
             'robot_epuck_host': '127.0.0.1',
             'robot_epuck_port': 10002,
             'robot_comms_host': '127.0.0.1',
@@ -155,6 +166,7 @@ gazebo_config = {
         },
         {
             'robot_id': 3,
+            'robot_name': 'epuck2_robot_{agent["robot_id"]}',
             'robot_epuck_host': '127.0.0.1',
             'robot_epuck_port': 10003,
             'robot_comms_host': '127.0.0.1',
@@ -201,6 +213,7 @@ else:
 
 implementations = {
     'epuck_implementation': {
+        'none': {},
         'epuck_driver_cpp': {
             'package': 'epuck_driver_cpp',
             'launchfile': 'epuck2_controller.launch.py',
@@ -240,12 +253,14 @@ implementations = {
         },
     },
     'comms_manager_implementation': {
+        'none': {},
         'central_node_py': {
             'package': 'agent_local_comms_server',
             'launchfile': 'agent_local_comms_server.launch.py',
         },
     },
     'agent_comms_implementation': {
+        'none': {},
         'epuck_firmware': {
         },
         'udp_cpp': {
@@ -262,6 +277,7 @@ implementations = {
         },
     },
     'localisation_implementation': {
+        'none': {},
         'gz_localisation': {
             'package': 'agent_local_comms_server',
             'launchfile': 'pose_tf.launch.py',
@@ -290,6 +306,7 @@ implementations = {
         }
     },
     'waypoint_controller_implementation': {
+        'none': {},
         'waypoint_controller_py': {
             'package': 'waypoint_controller',
             'launchfile': 'waypoint_controller_test.launch.py',
@@ -306,11 +323,158 @@ implementations = {
             },
         },
     },
+    'mocap_implementation': {
+        'none': {},
+        'vrpn_mocap': {
+            'launch_type': 'node',  # 'python_launchfile', 'yaml_launchfile', 'xml_launchfile'
+            'package': 'vrpn_mocap',
+            'launch': 'client_node',
+            'oneshot': True,
+            'extra_args': {
+                'launch_arguments': {
+                    'source_topic_name': '/vrpn_client_node/{}/pose',
+                    'source_frame_id': 'earth',
+                    'source_child_frame_id': '{}/base_link',
+                    'tf_frame_id': '{}/map',
+                    'tf_child_frame_id': '{}/odom',
+                },
+                'executable': '',
+                'package': '',
+                'name': '',
+                'namespace': '',
+                'exec_name': '',
+                'parameters': [],
+                'remappings': [],
+                'ros_arguments': [],
+                'arguments': [],
+
+                'env': '',
+                'additional_env': '',
+                'shell': '',
+                'sigterm_timeout': '',
+                'sigkill_timeout': '',
+                'emulate_tty': '',
+                'prefix': '',
+                'output': '',
+                'output_format': '',
+                'log_cmd': '',
+                'cached_output': '',
+                'on_exit': '',
+                'respawn': '',
+                'respawn_delay': '',
+                'respawn_max_retries': '',
+                'condition': '',
+            },
+        },
+    }
 }
 
 
+def launch_implementation(context, impl_category_definitions, config, impl_category) -> list[launch.Action]:
+    """Launch the implementation for the selected robot."""
+
+    def get_implementation_value(value: str) -> SomeSubstitutionsType:
+        if impl_category not in impl_category_definitions:
+            return None
+        available_impls = impl_category_definitions[impl_category]
+        if impl_category not in config:
+            return None
+        selected_impl = config[impl_category]
+        if selected_impl not in available_impls:
+            return None
+        if value not in available_impls[config[impl_category]]:
+            return None
+        return impl_category_definitions[impl_category][config[impl_category]][value]
+
+    def get_extra_arg(value: str) -> SomeSubstitutionsType:
+        extra_args = get_implementation_value('extra_args')
+        if extra_args is None:
+            return None
+        if value not in extra_args:
+            return None
+        return extra_args[value]
+
+    def substitute_dict(d: Optional[Dict[str, str]], agent=None):
+        return {f"{k}": f"{v}" for k, v in d.items()} if d else None
+
+    def substitute_iterable(i: Optional[Iterable[str]], agent=None):
+        return [f"{x}" for x in i] if i else None
+
+    def substitute_string(s: Optional[str], agent=None):
+        return f"{s}" if s else None
+
+    def substitute_remap(r: Optional[Iterable[Tuple[str, str]]], agent=None):
+        return [(f"{x[0]}", f"{x[1]}") for x in r] if r else None
+
+    actions = []
+
+    if get_implementation_value('oneshot'):
+
+        if get_implementation_value('launch_type') == 'node':
+            _action = launch_ros.actions.Node(
+                executable=substitute_string(get_extra_arg('executable') if get_extra_arg(
+                    'executable') else get_implementation_value('launch')),
+                package=substitute_string(get_extra_arg('package') if get_extra_arg(
+                    'package') else get_implementation_value('package')),
+                name=substitute_string(get_extra_arg('name')),
+                namespace=substitute_string(get_extra_arg('namespace')),
+                exec_name=substitute_string(get_extra_arg('exec_name')),
+                parameters=substitute_dict(get_extra_arg('parameters')),
+                remappings=substitute_remap(get_extra_arg('remappings')),
+                ros_arguments=substitute_iterable(
+                    get_extra_arg('ros_arguments')),
+                arguments=substitute_iterable(get_extra_arg('arguments')),
+                env=substitute_dict(get_extra_arg('env')),
+                additional_env=substitute_dict(
+                    get_extra_arg('additional_env')),
+                shell=substitute_string(get_extra_arg('shell')),
+                sigterm_timeout=substitute_string(
+                    get_extra_arg('sigterm_timeout')),
+                sigkill_timeout=substitute_string(
+                    get_extra_arg('sigkill_timeout')),
+                emulate_tty=substitute_string(get_extra_arg('emulate_tty')),
+                prefix=substitute_string(get_extra_arg('prefix')),
+                output=substitute_string(get_extra_arg('output')),
+                output_format=substitute_string(
+                    get_extra_arg('output_format')),
+                log_cmd=substitute_string(get_extra_arg('log_cmd')),
+                cached_output=substitute_string(
+                    get_extra_arg('cached_output')),
+                # on_exit is a bit tricky to implement
+                on_exit=substitute_string(get_extra_arg('on_exit')),
+                respawn=substitute_string(get_extra_arg('respawn')),
+                respawn_delay=substitute_string(
+                    get_extra_arg('respawn_delay')),
+                respawn_max_retries=substitute_string(get_extra_arg(
+                    'respawn_max_retries')),
+                condition=substitute_string(get_extra_arg('condition')),
+            )
+
+            actions.append(_action)
+
+        elif get_implementation_value('launch_type') == 'python_launchfile':
+            _action = IncludeLaunch(
+                PythonLaunch(
+                    PathJoin(
+                        [
+                            FindPackageShare(
+                                get_implementation_value('package'),
+                            ),
+                            'launch',
+                            get_implementation_value('launch'),
+                        ]
+                    )
+                ),
+                launch_arguments=get_implementation_value(
+                    'launch_arguments').items(),
+            )
+            actions.append(_action)
+
+    return actions
+
+
 def get_implementation_value(
-    implementation: str, value: str
+    impl_category: str, value: str
 ) -> SomeSubstitutionsType:
     """Get an implementation-dependent value from the launch configuration.
 
@@ -318,17 +482,23 @@ def get_implementation_value(
     settings without needing to update values in multiple places.
 
     Args:
-        implementation (str): Which implementation type to use.
+        impl_category (str): Which implementation type to use.
         value (str): The value to be substituted.
 
     Returns:
         SomeSubstitutionsType: The substitution.
     """
-    return implementations[implementation][
-        launch_configuration[implementation]
-    ][value] if value in implementations[implementation][
-        launch_configuration[implementation]
-    ] else None
+    if impl_category not in implementations:
+        return None
+    available_impls = implementations[impl_category]
+    if impl_category not in launch_configuration:
+        return None
+    selected_impl = launch_configuration[impl_category]
+    if selected_impl not in available_impls:
+        return None
+    if value not in available_impls[launch_configuration[impl_category]]:
+        return None
+    return implementations[impl_category][launch_configuration[impl_category]][value]
 
 
 def include_epuck_implementation(context) -> list[launch.Action]:
@@ -770,6 +940,10 @@ def include_waypoint_controller_implementation(context) -> list[launch.Action]:
         result.append(_include)
 
     return result
+
+
+def include_mocap_implementation(context) -> list[launch.Action]:
+    pass
 
 
 def launch_teleop(context) -> list[launch.Action]:
