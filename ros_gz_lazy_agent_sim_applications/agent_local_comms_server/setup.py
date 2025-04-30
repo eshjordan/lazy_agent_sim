@@ -9,7 +9,8 @@ setup(
     version="0.0.0",
     packages=find_packages(exclude=["test"]),
     data_files=[
-        ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
+        ("share/ament_index/resource_index/packages",
+         ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         (
             os.path.join("share", package_name, "launch"),
@@ -28,7 +29,8 @@ setup(
             "agent_local_comms_server = agent_local_comms_server.agent_local_comms_server:main",
             "udp_agent_comms = agent_local_comms_server.udp_agent_comms:main",
             "gz_agent_comms = agent_local_comms_server.gz_agent_comms:main",
-            "pose_tf = agent_local_comms_server.pose_tf:main"
+            "pose_tf = agent_local_comms_server.pose_tf:main",
+            "odom_tf = agent_local_comms_server.odom_tf:main",
         ],
     },
 )

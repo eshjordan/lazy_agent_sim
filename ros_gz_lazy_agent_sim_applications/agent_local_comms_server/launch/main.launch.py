@@ -285,6 +285,8 @@ implementations = {
                 'tf_frame_id': '{}/map',
                 'tf_child_frame_id': '{}/odom',
             },
+        },
+        'odom_localisation': {
         }
     },
     'waypoint_controller_implementation': {
