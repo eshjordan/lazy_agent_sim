@@ -220,10 +220,10 @@ implementations = {
             'package': 'epuck_driver_cpp',
             'launchfile': 'epuck2_controller.launch.py',
             'oneshot': False,
-            'rviz_config': os.path.join(
-                'config',
-                'multi_epuck2_driver_rviz.rviz',
-            ),
+            # 'rviz_config': os.path.join(
+            #     'config',
+            #     'multi_epuck2_driver_rviz.rviz',
+            # ),
             'extra_args': {
                 'rviz': 'false',
             },
@@ -316,7 +316,7 @@ implementations = {
                 'max_angular_vel': '3.14',
                 'slow_distance': '0.3',
                 'slow_angle': '0.3',
-                'threshold_distance': '0.05',
+                'threshold_distance': '0.15',
                 'threshold_angle': '0.05',
             },
         },
