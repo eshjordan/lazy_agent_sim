@@ -249,18 +249,6 @@ class LocalCommsManager(rclpy.node.Node):
                     for id, host, port, dist in neighbours
                 ]
 
-                response = EpuckHeartbeatResponsePacket(
-                    num_neighbours=len(neighbour_packets),
-                    neighbours=neighbour_packets,
-                ).pack()
-
-                manager.get_logger().debug(
-                    f"Sending heartbeat response to {self.client_address}"
-                )
-
-                # response = [0x21, len(neighbour_ids) + neighbour_id + len(neighbour_host) + neighbour_host + neighbour_port + neightbour_dist + ...]
-                client.sendto(response, self.client_address)
-
                 # Publish to the interaction topic
                 if len(new_in_range) > 0:
                     this_robot_knowledge = manager.request_knowledge(heartbeat.robot_id)
@@ -291,6 +279,18 @@ class LocalCommsManager(rclpy.node.Node):
                                 other_robot=other_robot_knowledge_msg,
                             )
                         )
+
+                response = EpuckHeartbeatResponsePacket(
+                    num_neighbours=len(neighbour_packets),
+                    neighbours=neighbour_packets,
+                ).pack()
+
+                manager.get_logger().debug(
+                    f"Sending heartbeat response to {self.client_address}"
+                )
+
+                # response = [0x21, len(neighbour_ids) + neighbour_id + len(neighbour_host) + neighbour_host + neighbour_port + neightbour_dist + ...]
+                client.sendto(response, self.client_address)
 
                 return
 
